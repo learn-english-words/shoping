@@ -3,32 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>WESAM SMART — المتجر ثلاثي الأبعاد</title>
+<title>النيون مول — Neon Mall 3D</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:#fff;font-family:'Segoe UI',Tahoma,sans-serif}
-#app{position:fixed;inset:0}canvas{display:block;touch-action:none}
-button,a{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible{outline:3px solid #8c7753;outline-offset:3px}
-#loader{position:fixed;inset:0;background:#f7f8fb;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .5s}
-#loader h1{font-size:clamp(28px,6vw,48px);color:#26374d}#loader p{color:#5b6677;font-size:14px}.tool{padding:12px 20px;background:#8c7753;color:#fff;border:0;border-radius:12px}#loader .tool{display:none}
-#header{position:fixed;top:0;right:0;z-index:10;padding:calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 12px 16px;pointer-events:none}
-.logo{color:#26374d;font-size:18px;font-weight:800;background:#faf7f0ed;border:1px solid #ffffff80;border-radius:8px;padding:10px 14px;letter-spacing:1px;box-shadow:0 3px 18px #19354c14}
-#mobile-controls{display:none;position:fixed;bottom:calc(18px + env(safe-area-inset-bottom));left:calc(18px + env(safe-area-inset-left));width:146px;height:146px;z-index:13;direction:ltr}
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#0a0a0e; font-family:'Segoe UI', Tahoma, sans-serif; }
+  #app { position:fixed; inset:0; }
+  canvas { display:block; }
 
-#joystick{position:relative;width:100%;height:100%;border-radius:50%;background:rgba(38,55,77,.18);border:1px solid rgba(255,255,255,.65);box-shadow:inset 0 0 22px #26374d18,0 4px 20px #26374d12;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-.joystick-ring{position:absolute;inset:20%;border:1px solid #ffffff60;border-radius:50%;pointer-events:none}
-#joystick-knob{position:absolute;left:50%;top:50%;width:46%;height:46%;border-radius:50%;background:linear-gradient(145deg,#43566d,#26374d);border:2px solid #d8c39e;box-shadow:0 4px 12px #18263740;transform:translate(-50%,-50%);pointer-events:none;transition:transform .12s ease-out}
-#joystick.active #joystick-knob{transition:none}#joystick.active{background:rgba(38,55,77,.28)}
-#panel{position:fixed;top:50%;left:24px;transform:translate(-130%,-50%);width:min(350px,88vw);max-height:85vh;overflow:auto;z-index:20;background:#fffffff5;border:1px solid #dbe4ef;border-radius:20px;padding:22px;box-shadow:0 12px 50px #152f4d33;transition:transform .25s;visibility:hidden}
-#panel.open{transform:translate(0,-50%);visibility:visible}
-.close{position:absolute;top:10px;left:10px;width:34px;height:34px;border-radius:50%;border:1px solid #d5dfec;background:#fff;color:#1b3558;font-size:16px;z-index:1}
-#p-img{width:100%;height:190px;border-radius:14px;margin-bottom:16px;background:#edf2f8;overflow:hidden}#p-img img{width:100%;height:100%;object-fit:contain}
-#p-name{font-size:20px;font-weight:700;color:#172c4a;margin-bottom:8px}#p-cat{color:#26374d;font-size:12px;margin-bottom:10px}#p-desc{color:#5b6677;font-size:14px;line-height:1.8;margin-bottom:14px}#p-price{color:#26374d;font-size:26px;font-weight:800;margin-bottom:16px}#p-price small{font-size:13px;color:#5b6677}
-.btn{display:block;width:100%;text-align:center;padding:14px;border-radius:12px;text-decoration:none;font-weight:700;font-size:15px;background:#26374d;color:#fff}.btn:hover{background:#182637}#p-btn[aria-disabled="true"]{opacity:.5;cursor:default}
-.demo{font-size:11px;color:#6c7788;line-height:1.7;margin-top:12px}
-body.product-open #mobile-controls{visibility:hidden}
-@media(pointer:coarse),(max-width:650px){#mobile-controls{display:block}.logo{font-size:15px;padding:8px 12px}#panel{left:16px;width:calc(100vw - 32px);max-height:calc(100dvh - 32px);padding:18px}}
-@media(max-height:500px){#mobile-controls{display:block;width:128px;height:128px;bottom:calc(12px + env(safe-area-inset-bottom));left:calc(12px + env(safe-area-inset-left))}#panel{top:50%;max-height:calc(100dvh - 24px)}#p-img{height:115px}}
+  #loader { position:fixed; inset:0; background:#0a0a0e; z-index:60; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; transition:opacity .8s; }
+  #loader h1 { color:#fff; font-size:clamp(30px,7vw,60px); letter-spacing:2px; text-shadow:0 0 10px #ff2fd6,0 0 40px #00f0ff; animation:pulse 1.6s ease-in-out infinite; }
+  #loader p { color:#ffd9a0; font-size:14px; letter-spacing:5px; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.55} }
+
+  #header { position:fixed; top:0; right:0; left:0; z-index:10; padding:14px 24px; display:flex; justify-content:space-between; align-items:center; pointer-events:none; background:linear-gradient(to bottom, rgba(10,10,14,.9), transparent); }
+  #header .logo { color:#fff; font-size:22px; font-weight:700; text-shadow:0 0 12px #d4a94e; pointer-events:auto; }
+  #hint { color:#f0ead8; font-size:12.5px; background:rgba(30,28,25,.55); border:1px solid rgba(212,169,78,.35); padding:8px 16px; border-radius:30px; backdrop-filter:blur(8px); pointer-events:auto; }
+  #hint b { color:#ffd9a0; }
+
+  #panel { position:fixed; top:50%; left:24px; transform:translate(-120%,-50%); width:min(340px,88vw); z-index:20; background:rgba(22,20,26,.9); backdrop-filter:blur(16px); border:1px solid rgba(212,169,78,.5); border-radius:20px; padding:24px; box-shadow:0 10px 50px rgba(0,0,0,.5); transition:transform .45s cubic-bezier(.2,.9,.3,1.2); }
+  #panel.open { transform:translate(0,-50%); }
+  #panel .close { position:absolute; top:12px; left:12px; width:32px; height:32px; border-radius:50%; border:1px solid rgba(255,255,255,.25); background:transparent; color:#fff; cursor:pointer; font-size:16px; transition:.2s; }
+  #panel .close:hover { background:#d4a94e; }
+  #p-img { width:100%; height:140px; border-radius:14px; margin-bottom:14px; display:flex; align-items:center; justify-content:center; font-size:50px; background:rgba(255,255,255,.05); border:1px dashed rgba(212,169,78,.4); }
+  #p-name { color:#fff; font-size:20px; font-weight:700; margin-bottom:6px; }
+  #p-cat { color:#ffd9a0; font-size:12px; margin-bottom:10px; }
+  #p-desc { color:#cfc8bb; font-size:14px; line-height:1.8; margin-bottom:12px; }
+  #p-price { color:#d4a94e; font-size:26px; font-weight:800; margin-bottom:14px; }
+  #p-price small { font-size:13px; color:#eee; font-weight:400; }
+  .btn { display:block; width:100%; text-align:center; padding:14px; border-radius:12px; text-decoration:none; font-weight:700; font-size:15px; transition:.25s; cursor:pointer; border:none; }
+  .btn-salla { background:linear-gradient(90deg,#d4a94e,#b8822f); color:#1a1408; }
+  .btn-salla:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(212,169,78,.5); }
+
+  #toast { position:fixed; top:80px; left:50%; transform:translateX(-50%); z-index:30; color:#1a1408; font-size:15px; font-weight:600; background:linear-gradient(90deg,#ffd9a0,#d4a94e); padding:12px 28px; border-radius:30px; box-shadow:0 5px 25px rgba(212,169,78,.4); opacity:0; transition:opacity .3s; pointer-events:none; }
+  #toast.show { opacity:1; }
+  #fade { position:fixed; inset:0; background:#000; z-index:40; opacity:0; transition:opacity .35s; pointer-events:none; }
+
+  #zone-badge { position:fixed; bottom:20px; right:24px; z-index:10; color:#ffd9a0; font-size:12px; background:rgba(30,28,25,.6); border:1px solid rgba(212,169,78,.35); padding:8px 16px; border-radius:30px; backdrop-filter:blur(8px); }
+  #keys { position:fixed; bottom:20px; left:24px; z-index:10; color:#e8e2d0; font-size:12px; background:rgba(30,28,25,.6); border:1px solid rgba(212,169,78,.3); padding:8px 16px; border-radius:30px; backdrop-filter:blur(8px); }
+  #keys b { color:#ffd9a0; }
+
+canvas{touch-action:none}
+#mobile-stick{display:none;position:fixed;left:calc(18px + env(safe-area-inset-left));bottom:calc(18px + env(safe-area-inset-bottom));width:138px;height:138px;z-index:15;direction:ltr;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#stick-base{position:relative;width:100%;height:100%;border-radius:50%;border:1px solid #ffd9a066;background:#241f2966;box-shadow:inset 0 0 25px #0002;touch-action:none}
+#stick-ring{position:absolute;inset:21%;border:1px solid #ffd9a044;border-radius:50%;pointer-events:none}
+#stick-knob{position:absolute;left:50%;top:50%;width:46%;height:46%;background:linear-gradient(145deg,#665330,#30291b);border:2px solid #d4a94e;border-radius:50%;box-shadow:0 4px 14px #0004;transform:translate(-50%,-50%);transition:transform .12s ease-out;pointer-events:none}
+#stick-base.active #stick-knob{transition:none}
+body.panel-open #mobile-stick{visibility:hidden}
+@media(pointer:coarse),(max-width:650px),(max-height:500px){#mobile-stick{display:block}#keys,#hint{display:none}#header{padding:calc(12px + env(safe-area-inset-top)) 16px 12px}#header .logo{font-size:18px}#zone-badge{bottom:calc(16px + env(safe-area-inset-bottom));right:calc(16px + env(safe-area-inset-right));font-size:10px;max-width:calc(100vw - 190px);padding:8px 10px}#panel{max-height:calc(100dvh - 28px);overflow:auto}#toast{max-width:88vw;text-align:center;font-size:12px}}
+@media(max-height:500px){#mobile-stick{width:112px;height:112px;bottom:calc(12px + env(safe-area-inset-bottom));left:calc(12px + env(safe-area-inset-left))}#p-img{height:100px}#panel{padding:18px}}
 </style>
 <script type="importmap">
 {
@@ -38,458 +60,753 @@ body.product-open #mobile-controls{visibility:hidden}
   }
 }
 </script>
-
+<base target="_blank">
 </head>
 <body>
-<div id="app"></div>
+<div id="app"></div><div id="mobile-stick" aria-label="عصا التحكم بالمشي"><div id="stick-base" role="group" aria-label="اسحب الدائرة للمشي"><div id="stick-ring"></div><div id="stick-knob"></div></div></div>
 
-<div id="loader">
-  <h1>WESAM SMART</h1>
-  <p id="load-message">جاري فتح المتجر ...</p><button class="tool" id="reload" onclick="location.reload()">إعادة المحاولة</button>
-</div>
+<div id="loader"><h1>النيون مول</h1><p>NEON MALL · جاري الفتح ...</p></div>
+<div id="fade"></div>
+<div id="toast"></div>
 
 <div id="header">
-  <div class="logo">WESAM <span style="color:#8c7753">SMART</span></div>
-  
+  <div class="logo">🏬 النيون مول</div>
+  <div id="hint"><b>WASD</b> مشي • <b>Shift</b> جري • اسحب للنظر • اضغط المحلات والشاشات والمنتجات 👆</div>
 </div>
 
-
-
-<div id="mobile-controls" aria-label="عصا التحكم بالمشي"><div id="joystick" role="group" aria-label="اسحب الدائرة للتحرك"><div class="joystick-ring"></div><div id="joystick-knob"></div></div></div>
-<div id="panel" role="dialog" aria-label="تفاصيل المنتج" aria-hidden="true">
+<div id="panel">
   <button class="close" onclick="closePanel()">✕</button>
-  <div id="p-img"><img id="product-image" alt=""></div>
+  <div id="p-img">📱</div>
   <div id="p-name"></div>
   <div id="p-cat"></div>
   <div id="p-desc"></div>
   <div id="p-price"></div>
-  <a id="p-btn" class="btn btn-salla" href="#" target="_blank" rel="noopener noreferrer">اطلب الآن من سلة</a><p class="demo" id="product-note"></p>
+  <a id="p-btn" class="btn btn-salla" href="#" target="_blank">🛒 اطلب الآن من سلة</a>
 </div>
 
+<div id="keys">⬆️ السلم الكهربائي: قف عند السهم الأخضر</div>
+<div id="zone-badge">📍 <span id="zone">الطابق الأرضي — الممر الرئيسي</span></div>
 
-
-
-<script>
-window.addEventListener('error',function(){var message=document.getElementById('load-message');if(message){message.textContent='تعذر تشغيل المتجر. تأكد من اتصال الإنترنت ودعم المتصفح لـ WebGL.';document.getElementById('reload').style.display='block';}});
-setTimeout(function(){var message=document.getElementById('load-message');if(message){message.textContent='التحميل يأخذ وقتاً أطول. تأكد من اتصال الإنترنت ثم أعد المحاولة.';document.getElementById('reload').style.display='block';}},15000);
-</script>
 <script type="module">
 import * as THREE from 'three';
 
-
 /* ============================================================
-   ⬇️ عدّل منتجاتك من هنا — أضف / عدّل / احذف بسهولة
-   لاحقًا نربط هذا الجزء تلقائيًا مع منتجات منصة سلة
+   ⬇️ إعداداتك — عدّل من هنا
    ============================================================ */
-const SALLA_STORE_URL = "https://salla.sa/YOUR-STORE"; // ← حط رابط متجرك في سلة هنا
+const SALLA_STORE_URL = "https://salla.sa/YOUR-STORE"; // رابط متجرك
 
-let products = [
-  { id:"k1",  name:"كفر نيون — آيفون 15",      price:59,  cat:"كفرات",        icon:"📱", color:0xff2fd6, desc:"كفر سيليكون مضاد للصدمات بتصميم نيون متوهج، حماية كاملة للكاميرا والشاشة." },
-  { id:"k2",  name:"كفر شفاف ماجنتك",          price:45,  cat:"كفرات",        icon:"📱", color:0x00f0ff, desc:"كفر شفاف يدعم الشحن المغناطيسي MagSafe مع حواف مرتفعة لحماية إضافية." },
-  { id:"k3",  name:"كفر ألعاب LED",            price:79,  cat:"كفرات",        icon:"🎮", color:0x7b2ff7, desc:"كفر للقيمرز بإضاءة LED متغيرة الألوان مع أزرار إضافية قابلة للبرمجة." },
-  { id:"s1",  name:"سماعة بلوتوث Pro",         price:199, cat:"سماعات",       icon:"🎧", color:0x00ff9d, desc:"سماعة رأس لاسلكية بعزل ضوضاء نشط وبطارية تدوم 40 ساعة مع ميكروفون نقي." },
-  { id:"s2",  name:"سماعات أذن لاسلكية",       price:149, cat:"سماعات",       icon:"🎧", color:0xffe600, desc:"سماعات TWS صغيرة بجودة صوت استوديو وعلبة شحن سريع، مقاومة للماء IPX5." },
-  { id:"s3",  name:"سماعة ألعاب RGB",          price:229, cat:"سماعات",       icon:"🎧", color:0xff2fd6, desc:"سماعة قيمنق بصوت محيطي 7.1 ومايك بإلغاء الضوضاء وإضاءة RGB متزامنة." },
-  { id:"c1",  name:"شاحن سريع 65W",            price:99,  cat:"شواحن",        icon:"🔌", color:0x00f0ff, desc:"شاحن GaN صغير بقوة 65 واط يشحن الجوال واللابتوب، بمنفذين USB-C وUSB-A." },
-  { id:"c2",  name:"كيبل مغناطيسي 3 في 1",     price:39,  cat:"شواحن",        icon:"🔌", color:0x7b2ff7, desc:"كيبل شحن مغناطيسي يدعم Lightning وUSB-C وMicro بطول 2 متر وقوة 100W." },
-  { id:"c3",  name:"باور بانك 20000mAh",       price:129, cat:"شواحن",        icon:"🔋", color:0x00ff9d, desc:"بطارية متنقلة بسعة كبيرة وشاشة عرض رقمية، تشحن 3 أجهزة بنفس الوقت." },
-  { id:"g1",  name:"حماية شاشة سيراميك",       price:35,  cat:"حماية",        icon:"🛡️", color:0xffe600, desc:"استيكر حماية سيراميك ناعم الملمس، مضاد للخدوش والبصمات وتركيب سهل." },
-  { id:"g2",  name:"عدسة حماية الكاميرا",      price:25,  cat:"حماية",        icon:"🛡️", color:0x00f0ff, desc:"حلقة حماية معدنية للكاميرا بجودة لا تؤثر على جودة الصور، تركيب دقيق." },
-  { id:"g3",  name:"جراب حماية عسكري",         price:69,  cat:"حماية",       icon:"🛡️", color:0xff2fd6, desc:"جراب بمعايير عسكرية مقاوم للسقوط من 3 أمتار مع حواف مطاطية ممتصة للصدمات." },
-  { id:"a1",  name:"حامل سيارة مغناطيسي",      price:49,  cat:"إكسسوارات",    icon:"🚗", color:0x7b2ff7, desc:"حامل مغناطيسي قوي للسيارة مع دوران 360 درجة، ثبات عالي على الطريق." },
-  { id:"a2",  name:"حامل مكتب ألمنيوم",        price:55,  cat:"إكسسوارات",    icon:"🖥️", color:0x00ff9d, desc:"حامل مكتبي من الألمنيوم بزوايا قابلة للتعديل، متوافق مع الجوال والتابلت." },
-  { id:"a3",  name:"قلم لمس ذكي",              price:89,  cat:"إكسسوارات",    icon:"✏️", color:0xffe600, desc:"قلم Stylus بدقة عالية وبطارية تدوم 10 ساعات، مثالي للرسم والتدوين." },
-  { id:"a4",  name:"استيكرات سكين نيون",       price:19,  cat:"إكسسوارات",    icon:"✨", color:0xff2fd6, desc:"حزمة استيكرات مقاومة للماء بتصاميم نيون، تناسب الجوال واللابتوب." },
-  { id:"a5",  name:"كفر تبريد للقيمنق",        price:75,  cat:"كفرات",        icon:"🎮", color:0x00f0ff, desc:"كفر بشريط تبريد نحاسي يخفض حرارة الجوال أثناء الألعاب الطويلة." },
-  { id:"a6",  name:"سبيكر بلوتوث محمول",       price:119, cat:"سماعات",      icon:"🔊", color:0x7b2ff7, desc:"مكبر صوت صغير بصوت قوي 360 درجة وبطارية 12 ساعة ومقاومة للماء." },
+/* 📢 الإعلانات — غيّر العناوين والروابط، أو استبدلها بصور:
+   { img:"https://رابط-الصورة.jpg", url:"https://رابط-الإعلان" } */
+const ADS = [
+  { title:"🔥 عرض اليوم",   sub:"خصم 30% على جميع الكفرات",      img:null, url:SALLA_STORE_URL },
+  { title:"🚚 شحن مجاني",   sub:"للطلبات فوق 200 ر.س",            img:null, url:SALLA_STORE_URL },
+  { title:"🎧 وصل حديثًا",  sub:"سماعات الألعاب RGB برو",        img:null, url:SALLA_STORE_URL },
+  { title:"📢 إعلانك هنا",  sub:"أجر مساحة إعلانية في المول",    img:null, url:"#" },
+  { title:"⚡ باور بانك",   sub:"سعة 20000mAh — الكمية محدودة",   img:null, url:SALLA_STORE_URL },
+  { title:"🛡️ حماية شاشة", sub:"تركيب مجاني داخل المحل",        img:null, url:SALLA_STORE_URL },
 ];
-/* ============================================================
-   ⬇️ نهاية قائمة المنتجات
-   ============================================================ */
 
-// ---------- المشهد الأساسي ----------
+const products = [
+  { id:"k1", name:"كفر نيون — آيفون 15",  price:59,  cat:"كفرات",     icon:"📱", color:0xff2fd6, desc:"كفر سيليكون مضاد للصدمات بتصميم نيون متوهج." },
+  { id:"k2", name:"كفر شفاف ماجنتك",      price:45,  cat:"كفرات",     icon:"📱", color:0x00f0ff, desc:"يدعم MagSafe مع حواف مرتفعة للحماية." },
+  { id:"k3", name:"كفر ألعاب LED",        price:79,  cat:"كفرات",     icon:"🎮", color:0x7b2ff7, desc:"إضاءة LED متغيرة مع أزرار إضافية." },
+  { id:"s1", name:"سماعة بلوتوث Pro",     price:199, cat:"سماعات",    icon:"🎧", color:0x00ff9d, desc:"عزل ضوضاء نشط وبطارية 40 ساعة." },
+  { id:"s2", name:"سماعات أذن لاسلكية",   price:149, cat:"سماعات",    icon:"🎧", color:0xffe600, desc:"جودة صوت استوديو ومقاومة ماء IPX5." },
+  { id:"s3", name:"سماعة ألعاب RGB",      price:229, cat:"سماعات",    icon:"🎧", color:0xff2fd6, desc:"صوت محيطي 7.1 ومايك بإلغاء الضوضاء." },
+  { id:"c1", name:"شاحن سريع 65W",        price:99,  cat:"شواحن",     icon:"🔌", color:0x00f0ff, desc:"شاحن GaN صغير بمنفذين USB-C وA." },
+  { id:"c2", name:"كيبل مغناطيسي 3 في 1", price:39,  cat:"شواحن",     icon:"🔌", color:0x7b2ff7, desc:"يدعم Lightning وUSB-C وMicro." },
+  { id:"c3", name:"باور بانك 20000mAh",   price:129, cat:"شواحن",     icon:"🔋", color:0x00ff9d, desc:"يشحن 3 أجهزة بنفس الوقت مع شاشة." },
+  { id:"g1", name:"حماية شاشة سيراميك",   price:35,  cat:"حماية",     icon:"🛡️", color:0xffe600, desc:"ناعم الملمس مضاد للخدوش والبصمات." },
+  { id:"g2", name:"عدسة حماية الكاميرا",  price:25,  cat:"حماية",     icon:"🛡️", color:0x00f0ff, desc:"حلقة معدنية لا تؤثر على جودة الصور." },
+  { id:"g3", name:"جراب حماية عسكري",     price:69,  cat:"حماية",     icon:"🛡️", color:0xff2fd6, desc:"مقاوم للسقوط من 3 أمتار." },
+  { id:"a1", name:"حامل سيارة مغناطيسي",  price:49,  cat:"إكسسوارات", icon:"🚗", color:0x7b2ff7, desc:"دوران 360 درجة وثبات عالي." },
+  { id:"a2", name:"حامل مكتب ألمنيوم",    price:55,  cat:"إكسسوارات", icon:"🖥️", color:0x00ff9d, desc:"زوايا قابلة للتعديل للجوال والتابلت." },
+  { id:"a3", name:"قلم لمس ذكي",          price:89,  cat:"إكسسوارات", icon:"✏️", color:0xffe600, desc:"دقة عالية وبطارية 10 ساعات." },
+  { id:"a4", name:"استيكرات سكين نيون",   price:19,  cat:"إكسسوارات", icon:"✨", color:0xff2fd6, desc:"مقاومة للماء بتصاميم نيون متنوعة." },
+];
+/* ============================================================ */
+
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xd9d0c3);
-scene.fog = new THREE.Fog(0xd9d0c3, 38, 80);
+scene.background = new THREE.Color(0x0a0a0e);
+scene.fog = new THREE.Fog(0x0a0a0e, 40, 110);
 
-const camera = new THREE.PerspectiveCamera(65, innerWidth/innerHeight, 0.1, 200);
+const camera = new THREE.PerspectiveCamera(65, innerWidth/innerHeight, 0.1, 250);
 camera.rotation.order = 'YXZ';
-camera.position.set(0, 1.7, -5); // مستوى عين الإنسان
+camera.position.set(0, 1.7, 22);
 
 const renderer = new THREE.WebGLRenderer({ antialias:true });
 renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.shadowMap.enabled = false;
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.getElementById('app').appendChild(renderer.domElement);
 
-// ---------- نظام المشي (FPS-style) ----------
-let yaw = 0;      // نبدأ واجهين الجدار الخلفي فيه الأرفف؟ لا — نبدأ واجهين المحل
-let pitch = 0;
-const keys = {};
-const stick={x:0,y:0,pointer:null};
-let bobT = 0;
-
-addEventListener('keydown', e => {
- if (/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
- if(e.code === 'Escape') { closePanel(); return; }
- if(e.code === 'KeyE' && hoveredMesh) { selectProduct(hoveredMesh); return; }
- if(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight'].includes(e.code)){e.preventDefault();keys[e.code]=true;}
-});
-addEventListener('blur',clearMovement);
-document.addEventListener('visibilitychange',()=>{if(document.hidden)clearMovement();});
-function clearMovement(){for(const k in keys)keys[k]=false;dragging=false;lookPointer=null;resetJoystick();}
-
-addEventListener('keyup',   e => { keys[e.code] = false; });
-
-// السحب للنظر حولك (بدون ما نخسر الضغط على المنتجات)
-let dragging = false, lookPointer=null, lastX = 0, lastY = 0, moved = 0;
-
-function onPointerDown(e) {
-  if (document.getElementById("panel").classList.contains("open")) closePanel();
-  if(dragging)return;
-  lookPointer=e.pointerId;
-  renderer.domElement.setPointerCapture(e.pointerId);
-  dragging = true;
-  moved = 0;
-  lastX = e.clientX; lastY = e.clientY;
-}
-function onPointerMove(e) {
-  if (!dragging || e.pointerId!==lookPointer) return;
-  const dx = e.clientX - lastX, dy = e.clientY - lastY;
-  moved += Math.abs(dx) + Math.abs(dy);
-  yaw   -= dx * 0.0042;
-  pitch -= dy * 0.0042;
-  pitch = Math.max(-1.35, Math.min(1.35, pitch)); // ما تنقلب الكاميرا
-  lastX = e.clientX; lastY = e.clientY;
-}
-function onPointerUp(e) {
-  if(!dragging||e.pointerId!==lookPointer)return;
-  dragging = false;
-  // إذا ما تحرك المؤشر تقريبًا = ضغطة → نفحص المنتجات
-  if (moved > 8) return;
-  pointer.x = (e.clientX / innerWidth) * 2 - 1;
-  pointer.y = -(e.clientY / innerHeight) * 2 + 1;
-  raycaster.setFromCamera(pointer, camera);
-  const hits = raycaster.intersectObjects(productMeshes, false);
-  if (hits.length) selectProduct(hits[0].object);
-  else closePanel();
-}
-
-renderer.domElement.addEventListener('pointerdown', onPointerDown);
-addEventListener('pointermove', onPointerMove);
-renderer.domElement.addEventListener('pointerup', onPointerUp);
-renderer.domElement.addEventListener('pointercancel',()=>{dragging=false;lookPointer=null;});
-
-// ---------- إضاءة بيضاء لإظهار ألوان المحل ----------
-scene.add(new THREE.HemisphereLight(0xfffaf2,0x727985,1.8));
-const key=new THREE.DirectionalLight(0xffffff,1.5);
-key.position.set(0,10,3);scene.add(key);
-for(const x of [-10,0,10]){
- const light=new THREE.PointLight(0xfff6ec,80,40);
- light.position.set(x,7,-5);scene.add(light);
-}
-// ---------- أرضية بيضاء مطفية ----------
-const floor=new THREE.Mesh(new THREE.PlaneGeometry(34,34),
- new THREE.MeshStandardMaterial({color:0xeeeae2,roughness:.72,metalness:0}));
-floor.rotation.x=-Math.PI/2;floor.position.y=.05;scene.add(floor);
-const grid=new THREE.GridHelper(34,17,0xd6cfc3,0xd6cfc3);
-grid.position.y=.065;grid.material.transparent=true;grid.material.opacity=.22;scene.add(grid);
-// ---------- الجدران ----------
-const wallMat = new THREE.MeshStandardMaterial({ color:0xb6a28b, roughness:0.9, side:THREE.BackSide });
-const walls = new THREE.Mesh(new THREE.BoxGeometry(34, 12, 34), wallMat);
-walls.position.y = 6;
-scene.add(walls);
-// ألواح خلفية وخطوط معدنية تعطي المحل هوية متناسقة.
-function decorBox(w,h,d,x,y,z,color,metalness=0){
- const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),
-  new THREE.MeshStandardMaterial({color,roughness:.65,metalness}));
- m.position.set(x,y,z);scene.add(m);return m;
-}
-decorBox(12,2.6,.13,0,7.8,-16.85,0x26374d);
-decorBox(12,.035,.18,0,6.48,-16.73,0xbda783,.5);
-for(let x=-16;x<=16;x+=2){
- decorBox(.018,11,.04,x,5.55,-16.91,0x9e8c75);
-}
-decorBox(33.5,.22,.10,0,.17,-16.85,0x3a3d43);
-decorBox(.1,.22,33.5,-16.85,.17,0,0x3a3d43);
-decorBox(.1,.22,33.5,16.85,.17,0,0x3a3d43);
-for(const x of [-10,0,10]){
- const fixture=new THREE.Mesh(new THREE.BoxGeometry(.16,.035,19),
-  new THREE.MeshBasicMaterial({color:0xfff8e9}));
- fixture.position.set(x,11.85,0);scene.add(fixture);
-}
-
-
-function neonStrip(w, h, d, x, y, z, color) {
-  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshBasicMaterial({ color }));
-  m.position.set(x, y, z);
-  scene.add(m);
-  return m;
-}
-function makeSign(text, color, size=90) {
+/* ---------- أدوات نصوص ---------- */
+function makeSign(text, color, size=90, w=1024, h=200) {
   const cv = document.createElement('canvas');
-  cv.width = 1024; cv.height = 256;
+  cv.width = w; cv.height = h;
   const ctx = cv.getContext('2d');
   ctx.font = `bold ${size}px Tahoma`;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.shadowColor = color; ctx.shadowBlur = 0;
+  ctx.shadowColor = color; ctx.shadowBlur = 20;
   ctx.fillStyle = color;
-  ctx.fillText(text, 512, 128);
+  ctx.fillText(text, w/2, h/2);
   const tex = new THREE.CanvasTexture(cv);
-  return new THREE.Mesh(new THREE.PlaneGeometry(10, 2.5),
+  return new THREE.Mesh(new THREE.PlaneGeometry(8, 1.6),
     new THREE.MeshBasicMaterial({ map:tex, transparent:true, side:THREE.DoubleSide }));
 }
-const sign = makeSign('WESAM SMART', '#f9f6ed');
-sign.position.set(0, 7.8, -16.74);
-scene.add(sign);
-const sign2 = makeSign('اكتشف ما يناسبك', '#f9f6ed', 70);
-sign2.position.set(16.8, 8.5, 0);
-sign2.rotation.y = -Math.PI/2;
-scene.add(sign2);
 
-// ---------- الأرفف والمنتجات ----------
-const productMeshes = [];
+/* ---------- إضاءة دافئة واقعية ---------- */
+scene.add(new THREE.AmbientLight(0xfff2e0, 1.15));
+const sun = new THREE.DirectionalLight(0xfff6e8, 1.3);
+sun.position.set(12, 22, 10); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.left = -40; sun.shadow.camera.right = 40;
+sun.shadow.camera.top = 40; sun.shadow.camera.bottom = -40;
+scene.add(sun);
+// كرات إضاءة دافئة على طول الممرات
+[[-9,4.6,0,0],[9,4.6,0,0],[-9,9.6,0,1],[9,9.6,0,1]].forEach(([x,y,z,f])=>{
+  const pl = new THREE.PointLight(0xffe6c0, 45, 32);
+  pl.position.set(x, y, z + (f? 0 : 0)); scene.add(pl);
+});
+const warmA = new THREE.PointLight(0xffe0b3, 40, 30); warmA.position.set(-9, 4.6, 0); scene.add(warmA);
+const warmB = new THREE.PointLight(0xffe0b3, 40, 30); warmB.position.set(9, 4.6, 0); scene.add(warmB);
+const warmC = new THREE.PointLight(0xffe0b3, 40, 30); warmC.position.set(-9, 9.6, 0); scene.add(warmC);
+const warmD = new THREE.PointLight(0xffe0b3, 40, 30); warmD.position.set(9, 9.6, 0); scene.add(warmD);
+const warmE = new THREE.PointLight(0xffe0b3, 35, 25); warmE.position.set(0, 9, 25); scene.add(warmE);
+const warmF = new THREE.PointLight(0xffe0b3, 35, 25); warmF.position.set(0, 9, -25); scene.add(warmF);
 
-function makeShelfUnit(x, z, rotY, catName, catColor) {
+/* ---------- ألوان واقعية ---------- */
+const MAT = {
+  floor:  new THREE.MeshStandardMaterial({ color:0xd9d2c4, roughness:0.25, metalness:0.08 }),
+  slab:   new THREE.MeshStandardMaterial({ color:0xcfc8ba, roughness:0.4 }),
+  wall:   new THREE.MeshStandardMaterial({ color:0xe9e2d2, roughness:0.9, side:THREE.BackSide }),
+  ceil:   new THREE.MeshStandardMaterial({ color:0xf2ede2, roughness:0.95, side:THREE.BackSide }),
+  gold:   new THREE.MeshStandardMaterial({ color:0xd4a94e, roughness:0.3, metalness:0.8 }),
+  glass:  new THREE.MeshStandardMaterial({ color:0xbfe8ee, roughness:0.05, metalness:0.4, transparent:true, opacity:0.25 }),
+  dark:   new THREE.MeshStandardMaterial({ color:0x2a2a30, roughness:0.5, metalness:0.6 }),
+  escal:  new THREE.MeshStandardMaterial({ color:0x9aa0a8, roughness:0.35, metalness:0.85 }),
+};
+
+const HALL_W=26,HALL_L=70,FLOOR_Y=5,HALL_H=14;
+const LEVEL_Y=FLOOR_Y+.2,CEILING_F0=FLOOR_Y-.2,CEILING_F1=FLOOR_Y+4.45;
+
+/* ---------- قاعة المول (الجدران والسقف) ---------- */
+const hall = new THREE.Mesh(new THREE.BoxGeometry(HALL_W, HALL_H, HALL_L), MAT.wall);
+hall.position.y = HALL_H/2;
+scene.add(hall);
+
+/* بلاطة الطابق الأول مع فتحة الـ Atrium (x: -3..3, z: -2..8) */
+function slab(w, d, x, z) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.4, d), MAT.slab);
+  m.position.set(x, FLOOR_Y, z);
+  m.receiveShadow = true; m.castShadow = true;
+  scene.add(m);
+}
+slab(HALL_W, HALL_L/2 - 8, 0,  (8 + HALL_L/2)/2);      // أمام الفتحة
+slab(HALL_W, HALL_L/2 - 2, 0, -(2 + HALL_L/2)/2);      // خلف الفتحة
+slab(HALL_W/2 - 3, 10, -(HALL_W/2 + 3)/2, 3);          // يسار الفتحة
+slab(HALL_W/2 - 3, 10,  (HALL_W/2 + 3)/2, 3);          // يمين الفتحة
+
+/* أرضية الطابق الأرضي */
+const gfloor = new THREE.Mesh(new THREE.PlaneGeometry(HALL_W, HALL_L), MAT.floor);
+gfloor.rotation.x = -Math.PI/2; gfloor.position.y = 0.01;
+gfloor.receiveShadow = true;
+scene.add(gfloor);
+
+/* سقف الطابق الأول (أرضية بلا فتحات بصرية — نخلي الفتحة مفتوحة للـ atrium) */
+/* بلاطة السقف: نفس تقسيم الفتحة */
+function ceilSlab(w, d, x, z) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.3, d), new THREE.MeshStandardMaterial({color:0xf2ede2,roughness:.95}));
+  m.position.set(x, FLOOR_Y + 4.6, z);
+  scene.add(m);
+}
+ceilSlab(HALL_W, HALL_L/2 - 8, 0,  (8 + HALL_L/2)/2);
+ceilSlab(HALL_W, HALL_L/2 - 2, 0, -(2 + HALL_L/2)/2);
+ceilSlab(HALL_W/2 - 3, 10, -(HALL_W/2 + 3)/2, 3);
+ceilSlab(HALL_W/2 - 3, 10,  (HALL_W/2 + 3)/2, 3);
+
+/* إضاءات سقف مدمجة (مظلات مضيئة) */
+function ceilingLights(y) {
+  for (let z = -30; z <= 30; z += 8) {
+    for (const x of [-7, 0, 7]) {
+      // تخطّ منطقة الفتحة للطابق الأول
+      if(Math.abs(x)<3.2&&z>-5&&z<12)continue;
+      const panel = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.08, 1.4),
+        new THREE.MeshBasicMaterial({ color:0xfff6e6 }));
+      panel.position.set(x,y===0?CEILING_F0-.15:CEILING_F1-.10,z);
+      scene.add(panel);
+    }
+  }
+}
+ceilingLights(0);
+ceilingLights(FLOOR_Y);
+
+/* ---------- درابزين زجاجي حول الفتحة (طابق أول) ---------- */
+function railing(w, d, x, z) {
   const g = new THREE.Group();
-  g.position.set(x, 0, z);
-  g.userData.category=catName;
-  g.rotation.y = rotY;
+  const glassP = new THREE.Mesh(new THREE.BoxGeometry(w, 1.1, d), MAT.glass);
+  glassP.position.y = 0.85; g.add(glassP);
+  const railTop = new THREE.Mesh(new THREE.BoxGeometry(w + 0.06, 0.09, d + 0.06), MAT.gold);
+  railTop.position.y = 1.42; g.add(railTop);
+  g.position.set(x, FLOOR_Y + 0.2, z);
+  scene.add(g);
+}
+railing(0.12, 10, -3, 3);   // يسار
+railing(0.12, 10,  3, 3);   // يمين
+// فتحات عند السلالم، مع درابزين بينهما وعلى الطرفين.
+for(const z of [8,-2]){
+ railing(.55,.12,-2.725,z);railing(.7,.12,0,z);railing(.55,.12,2.725,z);
+}
 
-  const frameMat = new THREE.MeshStandardMaterial({ color:0x253347, roughness:0.6, metalness:.15 });
-  const back = new THREE.Mesh(new THREE.BoxGeometry(5, 4.4, 0.15), frameMat);
-  back.position.y = 2.2; back.castShadow = back.receiveShadow = true;
-  g.add(back);
+/* ---------- السلم الكهربائي ---------- */
+const STEP_COUNT = 18;
+const ESC={xUp:-1.4,xDown:1.4,zBot:9.4,zTop:-2.8};
+const escSteps = [];
 
-  const edge = new THREE.Mesh(new THREE.BoxGeometry(5.15, 4.55, 0.08),
-    new THREE.MeshBasicMaterial({ color:0xbda783 }));
-  edge.position.set(0, 2.2, -0.06);
-  g.add(edge);
+function buildEscalator(x, goingUp) {
+  const g = new THREE.Group();
+  const dz = ESC.zTop - ESC.zBot;          // -10
+  const dy = LEVEL_Y;                      // 5
+  const len = Math.hypot(dz, dy);
+  const angle = Math.atan2(dy, -dz);       // ميل السلم
 
-  for (let i = 0; i < 3; i++) {
-    const sh = new THREE.Mesh(new THREE.BoxGeometry(5, 0.1, 1.1),
-      new THREE.MeshStandardMaterial({ color:0x384b63, roughness:0.55, metalness:.25 }));
-    sh.position.set(0, 0.9 + i * 1.6, 0.5);
-    sh.castShadow = sh.receiveShadow = true;
-    g.add(sh);
-    const led=new THREE.Mesh(new THREE.BoxGeometry(4.8,.025,.025),new THREE.MeshBasicMaterial({color:0xffedd0}));
-    led.position.set(0,.95+i*1.6,1.052);g.add(led);
+  // الهيكل المائل
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.5, len + .3), MAT.escal);
+  body.position.set(0, LEVEL_Y/2-.24, (ESC.zBot + ESC.zTop)/2);
+  body.rotation.x = angle;
+  g.add(body);
+
+  // يدّين جانبية (مطاط أسود)
+  for (const s of [-0.85, 0.85]) {
+    const hand = new THREE.Mesh(new THREE.BoxGeometry(0.14, 1.25, len + .3),
+      new THREE.MeshStandardMaterial({ color:0x1c1c20, roughness:0.6 }));
+    hand.position.set(s, LEVEL_Y/2+.65, (ESC.zBot + ESC.zTop)/2);
+    hand.rotation.x = angle;
+    g.add(hand);
   }
 
-  const catSign = makeSign(catName, '#ffffff', 80);
-  catSign.scale.set(0.35, 0.35, 0.35);
-  catSign.position.set(0, 4.9, 0.3);
-  g.add(catSign);
-  g.userData.sign=catSign;
+  // الدرجات المتحركة
+  for (let i = 0; i < STEP_COUNT; i++) {
+    const st = new THREE.Mesh(new THREE.BoxGeometry(1.3,.16,Math.abs(ESC.zTop-ESC.zBot)/STEP_COUNT+.07),
+      new THREE.MeshStandardMaterial({ color:0xc8ccd2, roughness:0.3, metalness:0.9,
+        emissive: goingUp ? 0x00ff9d : 0xff5555, emissiveIntensity: 0.06 }));
+    g.add(st);
+    escSteps.push({ mesh: st, off: i / STEP_COUNT, goingUp });
+  }
 
-  scene.add(g);
-  return g;
-}
 
+  for(const [z,y] of [[ESC.zBot+.55,0],[ESC.zTop-.55,LEVEL_Y]]){
+   const landing=new THREE.Mesh(new THREE.BoxGeometry(1.6,.12,1.4),MAT.escal);
+   landing.position.set(0,y-.06,z);g.add(landing);
+  }
+  g.position.x=x;scene.add(g);
+}
+buildEscalator(ESC.xUp, true);
+buildEscalator(ESC.xDown, false);
 
-const safeURL = (url) => {
- try { const u=new URL(url); return ['https:','http:'].includes(u.protocol) ? u.href : ''; } catch { return ''; }
-};
-function demoImage(p) {
- const color='#'+(p.color||0x00f0ff).toString(16).padStart(6,'0');
- let drawing;
- if(p.cat==='كفرات'||p.cat==='حماية') drawing='<rect x="130" y="65" width="140" height="260" rx="30" fill="'+color+'" stroke="#27354b" stroke-width="7"/><rect x="145" y="80" width="63" height="72" rx="17" fill="#202b3b"/><circle cx="162" cy="99" r="10" fill="#8cacc8"/><circle cx="190" cy="99" r="10" fill="#8cacc8"/><circle cx="162" cy="127" r="10" fill="#8cacc8"/><circle cx="200" cy="223" r="42" fill="none" stroke="#ffffffaa" stroke-width="7"/>';
- else if(p.cat==='سماعات') drawing='<path d="M110 225 V176 A90 90 0 0 1 290 176 V225" fill="none" stroke="#25334b" stroke-width="26"/><rect x="88" y="190" width="63" height="105" rx="26" fill="'+color+'"/><rect x="249" y="190" width="63" height="105" rx="26" fill="'+color+'"/><rect x="105" y="203" width="31" height="77" rx="14" fill="#25334b"/><rect x="264" y="203" width="31" height="77" rx="14" fill="#25334b"/>';
- else if(p.cat==='شواحن') drawing='<rect x="135" y="146" width="130" height="145" rx="24" fill="#ffffff" stroke="#26354a" stroke-width="7"/><path d="M172 146 V107 M228 146 V107" stroke="#647894" stroke-width="15"/><rect x="166" y="253" width="68" height="15" rx="7" fill="#26354a"/><path d="M208 174 L182 219 H210 L193 244" fill="none" stroke="'+color+'" stroke-width="11"/>';
- else drawing='<rect x="125" y="85" width="150" height="210" rx="20" fill="#27354b"/><rect x="140" y="102" width="120" height="165" rx="10" fill="'+color+'"/><path d="M200 295 V328 M151 335 H249" stroke="#647894" stroke-width="16"/>';
- return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="400" height="400" rx="20" fill="#edf2f8"/><ellipse cx="200" cy="350" rx="100" ry="14" fill="#d7dfea"/>'+drawing+'</svg>');
+// أسهم الأرضية عند مداخل السلم
+function arrow(x,z,y,color,text,up=true){
+ const cv=document.createElement('canvas');cv.width=256;cv.height=256;
+ const ctx=cv.getContext('2d');ctx.fillStyle=color;
+ ctx.beginPath();ctx.moveTo(128,20);ctx.lineTo(230,150);ctx.lineTo(160,150);ctx.lineTo(160,236);ctx.lineTo(96,236);ctx.lineTo(96,150);ctx.lineTo(26,150);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#fff';ctx.font='bold 37px Tahoma';ctx.textAlign='center';ctx.fillText(text,128,148);
+ const texture=new THREE.CanvasTexture(cv);
+ const m=new THREE.Mesh(new THREE.PlaneGeometry(1.2,1.2),new THREE.MeshBasicMaterial({map:texture,transparent:true,depthWrite:false}));
+ m.rotation.x=-Math.PI/2;if(!up)m.rotation.z=Math.PI;
+ m.position.set(x,y+.035,z);scene.add(m);
 }
-function productImage(p){return safeURL(p.image)||demoImage(p);}
-function makeCardTexture(p){
- const cv=document.createElement('canvas');cv.width=512;cv.height=640;
- const ctx=cv.getContext('2d');
- const tex=new THREE.CanvasTexture(cv);tex.colorSpace=THREE.SRGBColorSpace;
- function paint(img){
-  if(tex.userData.disposed)return;
-  ctx.fillStyle='#edf2f8';ctx.fillRect(0,0,512,640);
-  if(img){
-   const s=Math.min(456/img.width,428/img.height);
-   ctx.drawImage(img,(512-img.width*s)/2,20+(428-img.height*s)/2,img.width*s,img.height*s);
-  }else{ctx.fillStyle='#718298';ctx.font='24px Tahoma';ctx.textAlign='center';ctx.fillText('جاري تحميل الصورة',256,225);}
-  ctx.fillStyle='#101b2e';ctx.fillRect(0,466,512,174);
-  ctx.textAlign='center';ctx.direction='rtl';ctx.fillStyle='#f4f8ff';ctx.font='bold 27px Tahoma';
-  let label=p.name;while(ctx.measureText(label).width>465&&label.length>2)label=label.slice(0,-2)+'…';
-  ctx.fillText(label,256,515);
-  ctx.fillStyle='#d8c39e';ctx.font='bold 35px Tahoma';ctx.fillText(p.price+' ر.س',256,563);
-  ctx.fillStyle='#a8bdd3';ctx.font='20px Tahoma';ctx.fillText(safeURL(p.image)?p.cat:'رسم تجريبي · '+p.cat,256,606);
-  tex.needsUpdate=true;
- }
- paint();
- const img=new Image();img.crossOrigin='anonymous';
- img.onload=()=>paint(img);
- img.onerror=()=>{img.onerror=null;img.src=demoImage(p);};
- img.src=productImage(p);
- return tex;
-}
-function addProductToShelf(group,product,shelfIndex,slotIndex){
- const mesh=new THREE.Mesh(new THREE.BoxGeometry(1.18,1.45,.10),new THREE.MeshStandardMaterial({color:0x1d2939,emissive:0xbda783,emissiveIntensity:0,roughness:.5}));
- mesh.position.set(-1.65+slotIndex*1.65,1.7+shelfIndex*1.6,.72);
- mesh.userData.product=product;group.add(mesh);productMeshes.push(mesh);
- const front=new THREE.Mesh(new THREE.PlaneGeometry(1.10,1.375),new THREE.MeshBasicMaterial({map:makeCardTexture(product)}));
- front.position.z=.056;front.userData.product=product;front.userData.cardParent=mesh;mesh.add(front);productMeshes.push(front);
- const base=new THREE.Mesh(new THREE.BoxGeometry(1.27,.055,.35),new THREE.MeshBasicMaterial({color:0xbda783}));
- base.position.y=-.75;mesh.add(base);
-}
-const units = [
-  makeShelfUnit(-11, -14.5, 0, "كفرات", 0xff2fd6),
-  makeShelfUnit(-5.5, -14.5, 0, "كفرات", 0xff2fd6),
-  makeShelfUnit(0, -14.5, 0, "سماعات", 0x00f0ff),
-  makeShelfUnit(5.5, -14.5, 0, "سماعات", 0x00f0ff),
-  makeShelfUnit(11, -14.5, 0, "شواحن", 0x7b2ff7),
-  makeShelfUnit(-14.5, -8, Math.PI/2, "شواحن", 0x7b2ff7),
-  makeShelfUnit(-14.5, -2, Math.PI/2, "حماية", 0x00ff9d),
-  makeShelfUnit(-14.5, 4, Math.PI/2, "حماية", 0x00ff9d),
-  makeShelfUnit(14.5, -8, -Math.PI/2, "إكسسوارات", 0xffe600),
-  makeShelfUnit(14.5, -2, -Math.PI/2, "إكسسوارات", 0xffe600),
-  makeShelfUnit(14.5, 4, -Math.PI/2, "كفرات", 0xff2fd6),
-  makeShelfUnit(14.5, 10, -Math.PI/2, "إكسسوارات", 0xffe600),
+arrow(ESC.xUp,10.8,0,'#00b36b','صعود',true);
+arrow(ESC.xDown,-4.0,LEVEL_Y,'#cc3333','نزول',false);
+
+/* ---------- واجهات المحلات ---------- */
+const doors = [];
+const neonPulses = [];
+const adScreens = [];
+
+const mallStoresF0 = [
+  { name:"🎮 قيمنق ستور",  side:-1, z:-18, color:0x7b2ff7, open:false },
+  { name:"🎧 ساوند سيتي",  side:-1, z:-9,  color:0x00a8b5, open:false },
+  { name:"👟 سنيكرز هب",   side:-1, z:0,   color:0x00b36b, open:false },
+  { name:"☕ قهوة رقمية",  side:-1, z:9,   color:0xd4a94e, open:false },
+  { name:"💻 تك زون",      side: 1, z:-18, color:0x00a8b5, open:false },
+  { name:"👜 ستايل بوتيك", side: 1, z:-9,  color:0xd45494, open:false },
+  { name:"📱 إكسسواراتك",  side: 1, z:0,   color:0xd4a94e, open:true  },
+  { name:"🕶️ أوبتكس",      side: 1, z:9,   color:0x7b2ff7, open:false },
+];
+const mallStoresF1 = [
+  { name:"🍔 برجر نيون",   side:-1, z:-18, color:0xd4543a, open:false },
+  { name:"🍦 آيس كريم لاب",side:-1, z:-9,  color:0xd48fb0, open:false },
+  { name:"📚 مكتبة المول", side:-1, z:0,   color:0x4a7bd4, open:false },
+  { name:"🎬 سينما مول",   side:-1, z:9,   color:0x8a2fd4, open:false },
+  { name:"🏋️ فتنس زون",    side: 1, z:-18, color:0x3ad48a, open:false },
+  { name:"🧸 عالم الأطفال",side: 1, z:-9,  color:0xd4b02f, open:false },
+  { name:"💈 صالون النيون",side: 1, z:9,   color:0x2fa8d4, open:false },
+  { name:"🛋️ هوم ستايل",   side: 1, z:-24, color:0xb56a3a, open:false },
 ];
 
+function buildStorefront(st, y) {
+  const x = st.side * (HALL_W/2 - 0.4);
+  const facing = st.side === 1 ? -Math.PI/2 : Math.PI/2;
+  const hex = '#'+new THREE.Color(st.color).getHexString();
 
+  const frame = new THREE.Mesh(new THREE.PlaneGeometry(6.5,4.10),
+    new THREE.MeshBasicMaterial({ color: st.color, transparent:true, opacity: st.open ? 0.85 : 0.3 }));
+  frame.position.set(x, y + 2.13, st.z); frame.rotation.y = facing;
+  scene.add(frame);
+  neonPulses.push({ mesh: frame, base: st.open ? 0.85 : 0.3, open: st.open });
 
-let hoveredMesh=null;
-let storeUrl=safeURL(SALLA_STORE_URL.includes('YOUR-STORE')?'':SALLA_STORE_URL);
-// المنتجات تُعدّل من القائمة أعلاه. واجهة الزبون تعرض المحل فقط.
-function renderProducts(){
- const used=new Map(units.map(u=>[u,0]));
- products.forEach(p=>{
-  let candidates=units.filter(u=>u.userData.category===p.cat && used.get(u)<9);
-  if(!candidates.length)candidates=units.filter(u=>used.get(u)<9);
-  if(!candidates.length)return;
-  candidates.sort((a,b)=>used.get(a)-used.get(b));
-  const u=candidates[0],slot=used.get(u);
-  addProductToShelf(u,p,Math.floor(slot/3),slot%3);used.set(u,slot+1);
- });
+  const shutter = new THREE.Mesh(new THREE.PlaneGeometry(6,3.0),
+    new THREE.MeshStandardMaterial({ color:0x1a1a20, roughness:0.25, metalness:0.9, transparent:true, opacity: st.open ? 0.2 : 0.94 }));
+  shutter.position.set(st.side * (HALL_W/2 - 0.5), y + 1.60, st.z);
+  shutter.rotation.y = facing;
+  scene.add(shutter);
+
+  const sign = makeSign(st.name, hex, 75);
+  sign.scale.set(.75,.5,.75);
+  sign.position.set(st.side * (HALL_W/2 - 0.6), y + 3.55, st.z);
+  sign.rotation.y = facing;
+  scene.add(sign);
+
+  const door = new THREE.Mesh(new THREE.PlaneGeometry(2.7,2.9),
+    new THREE.MeshBasicMaterial({ color: st.color, transparent:true, opacity: st.open ? 0.5 : 0.1, side:THREE.DoubleSide }));
+  door.position.set(st.side * (HALL_W/2 - 0.7), y + 1.55, st.z);
+  door.rotation.y = facing;
+  door.userData.store = st;
+  scene.add(door);
+  doors.push(door);
+
+  const tag = makeSign(st.open ? '👆 ادخل المحل' : '🔒 قريبًا', st.open ? '#ffffff' : '#888899', 60, 512, 128);
+  tag.scale.set(.42,.25,.42);
+  tag.position.set(st.side * (HALL_W/2 - 0.6), y + 3.97, st.z);
+  tag.rotation.y = facing;
+  scene.add(tag);
+}
+mallStoresF0.forEach(s => buildStorefront(s, 0));
+mallStoresF1.forEach(s => buildStorefront(s, LEVEL_Y));
+
+/* لافتة المول */
+const mallSign = makeSign('🏬 النيون مول', '#d4a94e', 110);
+mallSign.position.set(0, 12, -HALL_L/2 + .3);
+scene.add(mallSign);
+const mallSign2 = makeSign('✦ تسوّق من مكانك ✦', '#8a7a55', 60);
+mallSign2.position.set(0, 10.2, -HALL_L/2 + .3);
+scene.add(mallSign2);
+
+/* لافتات الأدوار */
+const f1Sign = makeSign('الطابق الأول ⬆️', '#d4a94e', 70);
+f1Sign.position.set(-5.4,LEVEL_Y+2.7,-5);
+f1Sign.scale.set(.55,.55,.55);
+scene.add(f1Sign);
+const f0Sign = makeSign('الطابق الأرضي ⬇️', '#d4a94e', 70);
+f0Sign.position.set(5.4,2.7,12);
+f0Sign.scale.set(.55,.55,.55);
+f0Sign.rotation.y = Math.PI;
+scene.add(f0Sign);
+
+/* ---------- الشاشات الإعلانية ---------- */
+function makeAdTexture(ad, i) {
+  const cv = document.createElement('canvas');
+  cv.width = 512; cv.height = 288;
+  const ctx = cv.getContext('2d');
+  if (ad.img) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = ad.img;
+    img.onload = () => { ctx.drawImage(img, 0, 0, 512, 288); tex.needsUpdate = true; };
+  }
+  const hues = [340, 200, 160, 45, 20, 265];
+  const h = hues[i % hues.length];
+  const grd = ctx.createLinearGradient(0, 0, 512, 288);
+  grd.addColorStop(0, `hsl(${h}, 65%, 22%)`);
+  grd.addColorStop(1, `hsl(${(h+40)%360}, 70%, 38%)`);
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, 512, 288);
+  ctx.strokeStyle = `hsl(${h}, 90%, 65%)`; ctx.lineWidth = 8;
+  ctx.strokeRect(8, 8, 496, 272);
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 52px Tahoma';
+  ctx.fillText(ad.title, 256, 128);
+  ctx.font = '32px Tahoma';
+  ctx.fillStyle = `hsl(${h}, 100%, 82%)`;
+  ctx.fillText(ad.sub, 256, 195);
+  const tex = new THREE.CanvasTexture(cv);
+  return tex;
 }
 
-const joystick=document.getElementById('joystick');
-const knob=document.getElementById('joystick-knob');
-function resetJoystick(){
+function adScreen(ad,i,x,y,z,rotY,hanging){
+ const group=new THREE.Group();
+ const width=hanging?2.9:2.35,height=hanging?1.70:1.40;
+ const frame=new THREE.Mesh(new THREE.BoxGeometry(width,height,.16),MAT.dark);group.add(frame);
+ const tex=makeAdTexture(ad,i);
+ const screen=new THREE.Mesh(new THREE.PlaneGeometry(width-.14,height-.14),new THREE.MeshBasicMaterial({map:tex}));
+ screen.position.z=.085;screen.userData.ad=ad;group.add(screen);adScreens.push(screen);
+ if(hanging){
+  const back=screen.clone();back.rotation.y=Math.PI;back.position.z=-.085;back.userData.ad=ad;group.add(back);adScreens.push(back);
+  const ceiling=y<LEVEL_Y?CEILING_F0:CEILING_F1;
+  const top=y+height/2,wireLength=ceiling-top-.04;
+  if(wireLength>0)for(const offset of [-width*.36,width*.36]){
+   const wire=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,wireLength,6),MAT.dark);
+   wire.position.set(offset,height/2+wireLength/2,0);group.add(wire);
+  }
+ }
+ group.position.set(x,y,z);group.rotation.y=rotY;scene.add(group);
+}
+// أربعة شاشات معلقة خارج فتحة السلم، اثنتان لكل طابق.
+const screenPositions=[
+ {i:0,x:0,y:3.50,z:-27,rotation:0,hanging:true},
+ {i:1,x:0,y:3.50,z:23,rotation:0,hanging:true},
+ {i:2,x:0,y:LEVEL_Y+3.15,z:-27,rotation:0,hanging:true},
+ {i:4,x:0,y:LEVEL_Y+3.15,z:23,rotation:0,hanging:true},
+ // الشاشات الجدارية تقع في الفراغات بين المحلات.
+ {i:3,x:-HALL_W/2+.62,y:2.35,z:-13.5,rotation:Math.PI/2,hanging:false},
+ {i:5,x:HALL_W/2-.62,y:2.35,z:4.5,rotation:-Math.PI/2,hanging:false},
+ {i:0,x:-HALL_W/2+.62,y:LEVEL_Y+2.15,z:4.5,rotation:Math.PI/2,hanging:false},
+ {i:1,x:HALL_W/2-.62,y:LEVEL_Y+2.15,z:-13.5,rotation:-Math.PI/2,hanging:false},
+];
+screenPositions.forEach(p=>adScreen(ADS[p.i],p.i,p.x,p.y,p.z,p.rotation,p.hanging));
+
+/* مقاعد ونباتات */
+for (let z = -24; z <= 24; z += 12) {
+  const bench = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.5, 0.9),
+    new THREE.MeshStandardMaterial({ color:0x6a5a3a, roughness:0.6 }));
+  bench.position.set(-7, 0.35, z + 6); bench.castShadow = true; scene.add(bench);
+  if (!(z > -6 && z < 10)) { // بعيد عن السلم
+    const plant = new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.8, 8),
+      new THREE.MeshStandardMaterial({ color:0x2a6a45, roughness:0.8 }));
+    plant.position.set(7, 1.4, z - 2); plant.castShadow = true; scene.add(plant);
+  }
+}
+
+/* ---------- غرفة محلك ---------- */
+const SHOP = new THREE.Group();
+SHOP.position.set(200, 0, 0);
+scene.add(SHOP);
+{
+  const S = 18;
+  const room = new THREE.Mesh(new THREE.BoxGeometry(S, 7, S),
+    new THREE.MeshStandardMaterial({ color:0x14101a, roughness:0.9, side:THREE.BackSide }));
+  room.position.y = 3.5; SHOP.add(room);
+  const fl = new THREE.Mesh(new THREE.PlaneGeometry(S, S),
+    new THREE.MeshStandardMaterial({ color:0x1a1622, roughness:0.3, metalness:0.7 }));
+  fl.rotation.x = -Math.PI/2; fl.position.y = 0.02; SHOP.add(fl);
+  const sg = makeSign('📱 إكسسواراتك', '#ff2fd6', 95);
+  sg.position.set(0, 5.2, -S/2 + .25); SHOP.add(sg);
+  const mk = (w,h,d,x,y,z,c) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshBasicMaterial({ color:c })); m.position.set(x,y,z); SHOP.add(m); return m; };
+  mk(S-.3, .1, .1, 0, 6.8, -S/2+.2, 0xff2fd6);
+  mk(S-.3, .1, .1, 0, 6.8,  S/2-.2, 0x00f0ff);
+  mk(.1, .1, S-.3, -S/2+.2, 6.8, 0, 0x7b2ff7);
+  mk(.1, .1, S-.3,  S/2-.2, 6.8, 0, 0x00ff9d);
+  const exitDoor = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 3.4),
+    new THREE.MeshBasicMaterial({ color:0xd4a94e, transparent:true, opacity:0.5, side:THREE.DoubleSide }));
+  exitDoor.position.set(0, 1.7, S/2 - .3);
+  exitDoor.rotation.y = Math.PI;
+  exitDoor.userData.isExit = true;
+  SHOP.add(exitDoor);
+  doors.push(exitDoor);
+  const exitSign = makeSign('🚪 خروج للمول', '#ffd9a0', 55, 512, 128);
+  exitSign.scale.set(0.5, 0.5, 0.5);
+  exitSign.position.set(0, 4.1, S/2 - .35);
+  exitSign.rotation.y = Math.PI;
+  SHOP.add(exitSign);
+}
+
+const productMeshes = [];
+function makeShelfUnit(x, z, rotY, catName, catColor) {
+  const g = new THREE.Group();
+  g.position.set(x, 0, z); g.rotation.y = rotY;
+  const back = new THREE.Mesh(new THREE.BoxGeometry(4.6, 4.2, 0.15),
+    new THREE.MeshStandardMaterial({ color:0x1a1622, roughness:0.6, metalness:0.5 }));
+  back.position.y = 2.1; back.castShadow = true; g.add(back);
+  const edge = new THREE.Mesh(new THREE.BoxGeometry(4.75, 4.35, 0.08),
+    new THREE.MeshBasicMaterial({ color:catColor }));
+  edge.position.set(0, 2.1, -0.06); g.add(edge);
+  for (let i = 0; i < 3; i++) {
+    const sh = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.1, 1.0),
+      new THREE.MeshStandardMaterial({ color:0x242030, roughness:0.4, metalness:0.7 }));
+    sh.position.set(0, 0.9 + i * 1.3, 0.45); sh.castShadow = true; g.add(sh);
+  }
+  const catSign = makeSign(catName, '#'+new THREE.Color(catColor).getHexString(), 75);
+  catSign.scale.set(0.3, 0.3, 0.3);
+  catSign.position.set(0, 4.7, 0.25); g.add(catSign);
+  SHOP.add(g);
+  return g;
+}
+function addProductToShelf(group, product, shelfIndex, slotIndex) {
+  const shelfY = 0.95 + shelfIndex * 1.3;
+  const slotX = -1.5 + slotIndex * 1.5;
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.95, 0.45),
+    new THREE.MeshStandardMaterial({ color:0x111118, roughness:0.3, metalness:0.8, emissive:product.color, emissiveIntensity:0.55 }));
+  mesh.position.set(slotX, shelfY + 0.5, 0.45);
+  mesh.castShadow = true;
+  mesh.userData.product = product;
+  group.add(mesh);
+  productMeshes.push(mesh);
+  const glow = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.1, 0.55),
+    new THREE.MeshBasicMaterial({ color:product.color, transparent:true, opacity:0.12 }));
+  glow.position.copy(mesh.position);
+  group.add(glow);
+}
+const shopUnits = [
+  makeShelfUnit(-6, -8.2, 0, "كفرات", 0xff2fd6),
+  makeShelfUnit(-2, -8.2, 0, "كفرات", 0xff2fd6),
+  makeShelfUnit(2,  -8.2, 0, "سماعات", 0x00f0ff),
+  makeShelfUnit(6,  -8.2, 0, "سماعات", 0x00f0ff),
+  makeShelfUnit(-8.2, -3, Math.PI/2, "شواحن", 0x7b2ff7),
+  makeShelfUnit(-8.2, 2,  Math.PI/2, "حماية", 0x00ff9d),
+  makeShelfUnit(8.2, -3, -Math.PI/2, "إكسسوارات", 0xffe600),
+  makeShelfUnit(8.2, 2,  -Math.PI/2, "إكسسوارات", 0xffe600),
+];
+products.forEach((p, i) => {
+  const unit = shopUnits[i % shopUnits.length];
+  addProductToShelf(unit, p, Math.floor(i / shopUnits.length) % 3, i % 3);
+});
+
+/* ---------- الحالة والتنقل ---------- */
+let zone = 'mall';        // mall | shop
+let floor = 0;            // 0 أرضي | 1 أول
+let riding = null;        // {t, from, to, up}
+
+const ZONES = {
+  mall: { label: () => floor === 0 ? 'الطابق الأرضي — الممر الرئيسي' : 'الطابق الأول — الممر' },
+  shop: { label: () => 'محلك — إكسسواراتك' },
+};
+function updateBadge() { document.getElementById('zone').textContent = ZONES[zone].label(); }
+
+function teleport(z) {
+  if(transitioning)return;transitioning=true;clearMovement();
+  const fade = document.getElementById('fade');
+  fade.style.opacity = 1;
+  setTimeout(() => {
+    zone = z;
+    if (z === 'shop') { camera.position.set(200, 1.7, 4); yaw = 0; floor = 0; }
+    else { camera.position.set(8,1.7+LEVEL_Y*floor,floor===0?0:-5);yaw=Math.PI/2; }
+    pitch = 0;
+    updateBadge(); closePanel();
+    fade.style.opacity = 0;transitioning=false;
+  }, 380);
+}
+
+function startRide(up) {
+  clearMovement();
+  const x = up ? ESC.xUp : ESC.xDown;
+  riding = {
+    t: 0,
+    from: new THREE.Vector3(x, 0, up ? ESC.zBot : ESC.zTop),
+    to:   new THREE.Vector3(x, 0, up ? ESC.zTop : ESC.zBot),
+    up,
+  };
+}
+
+/* ---------- التحكم ---------- */
+let yaw = 0, pitch = 0;
+
+const keys={};
+const stick={x:0,y:0,pointer:null};
+const stickBase=document.getElementById('stick-base'),stickKnob=document.getElementById('stick-knob');
+let transitioning=false,lookPointer=null;
+function resetStick(){
  const id=stick.pointer;stick.x=0;stick.y=0;stick.pointer=null;
- joystick.classList.remove('active');knob.style.transform='translate(-50%,-50%)';
- if(id!==null && joystick.hasPointerCapture(id))joystick.releasePointerCapture(id);
+ stickBase.classList.remove('active');stickKnob.style.transform='translate(-50%,-50%)';
+ if(id!==null&&stickBase.hasPointerCapture(id))stickBase.releasePointerCapture(id);
 }
-function moveJoystick(e){
- if(e.pointerId!==stick.pointer)return;
- const box=joystick.getBoundingClientRect();
- const radius=box.width*.27;
- let dx=e.clientX-(box.left+box.width/2),dy=e.clientY-(box.top+box.height/2);
+function clearMovement(){for(const k in keys)keys[k]=false;dragging=false;lookPointer=null;resetStick();}
+function moveStick(e){
+ if(stick.pointer!==e.pointerId)return;
+ const r=stickBase.getBoundingClientRect(),radius=r.width*.27;
+ let dx=e.clientX-r.left-r.width/2,dy=e.clientY-r.top-r.height/2;
  const distance=Math.hypot(dx,dy);
  if(distance>radius){dx*=radius/distance;dy*=radius/distance;}
- const magnitude=Math.min(1,distance/radius),deadZone=.12;
- const strength=magnitude<=deadZone?0:(magnitude-deadZone)/(1-deadZone);
- const angle=Math.atan2(dy,dx);
- stick.x=Math.cos(angle)*strength;stick.y=Math.sin(angle)*strength;
- knob.style.transform='translate(calc(-50% + '+dx+'px),calc(-50% + '+dy+'px))';
+ const magnitude=Math.min(1,distance/radius),strength=magnitude<=.12?0:(magnitude-.12)/.88;
+ const angle=Math.atan2(dy,dx);stick.x=Math.cos(angle)*strength;stick.y=Math.sin(angle)*strength;
+ stickKnob.style.transform='translate(calc(-50% + '+dx+'px),calc(-50% + '+dy+'px))';
 }
-joystick.addEventListener('pointerdown',e=>{
- if(stick.pointer!==null || document.body.classList.contains('product-open'))return;
- e.preventDefault();stick.pointer=e.pointerId;joystick.setPointerCapture(e.pointerId);joystick.classList.add('active');moveJoystick(e);
+stickBase.addEventListener('pointerdown',e=>{
+ if(stick.pointer!==null||riding||transitioning||document.body.classList.contains('panel-open'))return;
+ e.preventDefault();stick.pointer=e.pointerId;stickBase.setPointerCapture(e.pointerId);stickBase.classList.add('active');moveStick(e);
 });
-joystick.addEventListener('pointermove',e=>{if(e.pointerId===stick.pointer){e.preventDefault();moveJoystick(e);}});
-for(const event of ['pointerup','pointercancel','lostpointercapture'])joystick.addEventListener(event,e=>{if(e.pointerId===stick.pointer)resetJoystick();});
-window.addEventListener('resize',resetJoystick);
-// ---------- التفاعل مع المنتجات ----------
+stickBase.addEventListener('pointermove',e=>{if(e.pointerId===stick.pointer){e.preventDefault();moveStick(e);}});
+for(const type of ['pointerup','pointercancel','lostpointercapture'])stickBase.addEventListener(type,e=>{if(e.pointerId===stick.pointer)resetStick();});
+addEventListener('resize',resetStick);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)clearMovement();});
+
+let bobT = 0, dragging = false, lastX = 0, lastY = 0, moved = 0;
+addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();keys[e.code]=true;});
+addEventListener('blur',clearMovement);
+addEventListener('keyup',   e => keys[e.code] = false);
+
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 let selectedMesh = null;
 
-function selectProduct(mesh) {
-  mesh=mesh.userData.cardParent||mesh;
-  clearMovement();
-  if (selectedMesh) selectedMesh.material.emissiveIntensity = 0;
-  selectedMesh = mesh;
-  mesh.material.emissiveIntensity = .3;
 
+renderer.domElement.addEventListener('pointerdown',e=>{
+ if(dragging||riding||transitioning)return;
+ lookPointer=e.pointerId;renderer.domElement.setPointerCapture(e.pointerId);
+ dragging=true;moved=0;lastX=e.clientX;lastY=e.clientY;
+});
+renderer.domElement.addEventListener('pointercancel',e=>{if(e.pointerId===lookPointer){dragging=false;lookPointer=null;}});
+
+addEventListener('pointermove', e => {
+  if(!dragging||riding||e.pointerId!==lookPointer)return;
+  const dx = e.clientX - lastX, dy = e.clientY - lastY;
+  moved += Math.abs(dx) + Math.abs(dy);
+  yaw -= dx * 0.0042;
+  pitch = Math.max(-1.35, Math.min(1.35, pitch - dy * 0.0042));
+  lastX = e.clientX; lastY = e.clientY;
+});
+renderer.domElement.addEventListener('pointerup',e=>{
+  if(!dragging||e.pointerId!==lookPointer)return;
+  dragging=false;lookPointer=null;
+  if (moved > 8 || riding) return;
+  pointer.x = (e.clientX / innerWidth) * 2 - 1;
+  pointer.y = -(e.clientY / innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+
+  const hits = raycaster.intersectObjects(productMeshes, false);
+  if (hits.length) { selectProduct(hits[0].object); return; }
+
+  const dhits = raycaster.intersectObjects(doors, false);
+  if (dhits.length) {
+    const d = dhits[0].object;
+    if (d.userData.isExit) teleport('mall');
+    else if (d.userData.store?.open) teleport('shop');
+    else showToast('🔒 هذا المحل قريبًا — ترقبوا الافتتاح!');
+    return;
+  }
+
+  const ahits = raycaster.intersectObjects(adScreens, false);
+  if (ahits.length) {
+    const ad = ahits[0].object.userData.ad;
+    if (ad.url && ad.url !== '#') window.open(ad.url, '_blank');
+    else showToast('📢 هذه المساحة الإعلانية متاحة للتأجير!');
+    return;
+  }
+  closePanel();
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function selectProduct(mesh) {
+  clearMovement();document.body.classList.add("panel-open");
+  if (selectedMesh) selectedMesh.material.emissiveIntensity = 0.55;
+  selectedMesh = mesh;
+  mesh.material.emissiveIntensity = 1.4;
   const p = mesh.userData.product;
-  const img=document.getElementById('product-image');img.onerror=()=>{img.onerror=null;img.src=demoImage(p);};img.src=productImage(p);img.alt=p.name;
+  document.getElementById('p-img').textContent = p.icon;
   document.getElementById('p-name').textContent = p.name;
   document.getElementById('p-cat').textContent = 'القسم: ' + p.cat;
   document.getElementById('p-desc').textContent = p.desc;
   document.getElementById('p-price').innerHTML = p.price + ' <small>ر.س</small>';
-
-  const link=safeURL(p.url);const btn=document.getElementById('p-btn');
-  const target=link||storeUrl;
-  if(target){btn.href=target;btn.removeAttribute('aria-disabled');btn.textContent=link?'اطلب المنتج من سلة':'زيارة المتجر في سلة';}
-  else{btn.removeAttribute('href');btn.setAttribute('aria-disabled','true');btn.textContent='رابط المنتج غير مضاف بعد';}
-  document.getElementById('product-note').textContent=(safeURL(p.image)?'':'الصورة رسم توضيحي تجريبي. ')+(link?'سيُفتح رابط المنتج لإتمام الطلب.':storeUrl?'سيُفتح المتجر لإكمال التسوق.':'الطلب غير متاح لهذا المنتج حالياً.');
-  document.getElementById('panel').setAttribute('aria-hidden','false');
-
+  document.getElementById('p-btn').href = SALLA_STORE_URL + '/products/' + p.id;
   document.getElementById('panel').classList.add('open');
-  document.body.classList.add('product-open');
 }
-
 window.closePanel = function() {
+  document.body.classList.remove("panel-open");
   document.getElementById('panel').classList.remove('open');
-  document.body.classList.remove('product-open');
-  document.getElementById('panel').setAttribute('aria-hidden','true');
-  if (selectedMesh) { selectedMesh.material.emissiveIntensity = 0; selectedMesh = null; }
+  if (selectedMesh) { selectedMesh.material.emissiveIntensity = 0.55; selectedMesh = null; }
 };
 
-
-renderProducts();
-const obstacles=units.map(u=>{
- u.updateMatrixWorld(true);
- const box=new THREE.Box3();
- for(const x of [-2.65,2.65])for(const z of [-.2,1.15])box.expandByPoint(u.localToWorld(new THREE.Vector3(x,0,z)));
- return box;
-});
-function blocked(x,z){return obstacles.some(b=>x>b.min.x-.35&&x<b.max.x+.35&&z>b.min.z-.35&&z<b.max.z+.35);}
-let hoverTimer=0;
-// ---------- الحلقة ----------
+/* ---------- الحلقة ---------- */
 const clock = new THREE.Clock();
 const EYE = 1.7;
-const ROOM = 15; // حدود المحل
+const RIDE_TIME = 5;
 
 function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.05);
   const t = clock.getElapsedTime();
 
-  // ====== الحركة WASD ======
+  // نبض واجهات المحلات
+  neonPulses.forEach((p, i) => { p.mesh.material.opacity = p.base + Math.sin(t * 2 + i) * (p.open ? 0.15 : 0.06); });
+
+  // حركة درجات السلم الكهربائي
+  escSteps.forEach(s => {
+    const prog = ((t * 0.12) + s.off) % 1;
+    const zz = s.goingUp ? ESC.zBot + (ESC.zTop - ESC.zBot) * prog : ESC.zTop + (ESC.zBot - ESC.zTop) * prog;
+    const yy = LEVEL_Y * (s.goingUp ? prog : 1 - prog);
+    s.mesh.position.set(0,yy-.08,zz);
+  });
+
   const speed = (keys['ShiftLeft'] || keys['ShiftRight']) ? 8 : 4;
-  const fx = -Math.sin(yaw), fz = -Math.cos(yaw);        // للأمام
-  const rx =  Math.cos(yaw), rz = -Math.sin(yaw);        // لليمين
 
-  let mx = rx*stick.x-fx*stick.y, mz = rz*stick.x-fz*stick.y;
-  if (keys['KeyW'] || keys['ArrowUp'])    { mx += fx; mz += fz; }
-  if (keys['KeyS'] || keys['ArrowDown'])  { mx -= fx; mz -= fz; }
-  if (keys['KeyD'] || keys['ArrowRight']) { mx += rx; mz += rz; }
-  if (keys['KeyA'] || keys['ArrowLeft'])  { mx -= rx; mz -= rz; }
+  /* ===== ركوب السلم ===== */
+  if (riding) {
+    riding.t += dt / RIDE_TIME;
+    const k = Math.min(riding.t, 1);
+    const ease = k < .5 ? 2*k*k : 1 - Math.pow(-2*k + 2, 2)/2; // ease in-out
+    camera.position.x = riding.from.x;
+    camera.position.z = riding.from.z + (riding.to.z - riding.from.z) * ease;
+    const baseY=LEVEL_Y*(riding.up?ease:1-ease);
+    camera.position.y = baseY + EYE + Math.sin(t * 8) * 0.02;
+    // وجّه الكاميرا لاتجاه الحركة
+    yaw=riding.up?0:Math.PI;
+    pitch = -0.25;
+    if (k >= 1) {
 
-  if(document.getElementById("panel").classList.contains("open")){mx=0;mz=0;}
-  const len = Math.hypot(mx, mz);
-  if (len > 0) {
-    
-const nextX=camera.position.x+(mx/Math.max(1,len))*speed*dt;
-    const nextZ=camera.position.z+(mz/Math.max(1,len))*speed*dt;
-    if(!blocked(nextX,camera.position.z))camera.position.x=nextX;
-    if(!blocked(camera.position.x,nextZ))camera.position.z=nextZ;
-    bobT += dt * speed * 2.2; // اهتزاز خفيف أثناء المشي
+      const wasUp=riding.up;floor=wasUp?1:0;
+      camera.position.z=wasUp?ESC.zTop-1.25:ESC.zBot+1.25;
+      camera.position.y=LEVEL_Y*floor+EYE;
+      riding=null;
+      pitch = 0;
+      updateBadge();
+    }
+  } else {
+    /* ===== مشي عادي ===== */
+    if (zone === 'mall') {
+      // مناطق صعود/نزول السلم
+      const p = camera.position;
+      if (floor === 0 && Math.abs(p.x-ESC.xUp)<.7&&Math.abs(p.z-(ESC.zBot+.65))<.8) startRide(true);
+      else if (floor === 1 && Math.abs(p.x-ESC.xDown)<.7&&Math.abs(p.z-(ESC.zTop-.65))<.8) startRide(false);
+    }
+
+    const fx = -Math.sin(yaw), fz = -Math.cos(yaw);
+    const rx =  Math.cos(yaw), rz = -Math.sin(yaw);
+    let mx=rx*stick.x-fx*stick.y,mz=rz*stick.x-fz*stick.y;
+    if (keys['KeyW'] || keys['ArrowUp'])    { mx += fx; mz += fz; }
+    if (keys['KeyS'] || keys['ArrowDown'])  { mx -= fx; mz -= fz; }
+    if (keys['KeyD'] || keys['ArrowRight']) { mx += rx; mz += rz; }
+    if (keys['KeyA'] || keys['ArrowLeft'])  { mx -= rx; mz -= rz; }
+
+    if(riding||transitioning||document.getElementById("panel").classList.contains("open")){mx=0;mz=0;}
+    const len=Math.hypot(mx,mz);
+    if (len > 0) {
+      camera.position.x += (mx/Math.max(1,len))*speed*dt;
+      camera.position.z += (mz/Math.max(1,len))*speed*dt;
+      bobT += dt * speed * 2.2;
+    }
+
+    if (zone === 'mall') {
+      camera.position.x = Math.max(-(HALL_W/2 - 1), Math.min(HALL_W/2 - 1, camera.position.x));
+      camera.position.z = Math.max(-(HALL_L/2 - 1.5), Math.min(HALL_L/2 - 1.5, camera.position.z));
+      // منع السقوط من فتحة الـ Atrium في الطابق الأول
+      if (floor === 1) {
+        const p = camera.position;
+        if (Math.abs(p.x)<3.2&&p.z>-2.2&&p.z<8.3) {
+          // ادفعه لأقرب حافة
+          const dl = p.x - (-3.2), dr = 3.2 - p.x, db = p.z + 2.2, df = 8.3 - p.z;
+          const m = Math.min(dl, dr, db, df);
+          if (m === dl) p.x = -3.2; else if (m === dr) p.x = 3.2;
+          else if (m === db) p.z = -2.2; else p.z = 8.3;
+        }
+      }
+      camera.position.y = LEVEL_Y * floor + EYE + Math.sin(bobT) * 0.045;
+    } else {
+      camera.position.x = Math.max(200 - 7.5, Math.min(200 + 7.5, camera.position.x));
+      camera.position.z = Math.max(-7.5, Math.min(7.5, camera.position.z));
+      camera.position.y = EYE + Math.sin(bobT) * 0.045;
+    }
+    camera.rotation.y = yaw;
+    camera.rotation.x = pitch;
   }
 
-  // حدود المحل (ما تطلع من الجدران)
-  camera.position.x = Math.max(-ROOM, Math.min(ROOM, camera.position.x));
-  camera.position.z = Math.max(-ROOM, Math.min(ROOM, camera.position.z));
-
-  camera.position.y = EYE + Math.sin(bobT) * 0.045;
-  camera.rotation.y = yaw;
-  camera.rotation.x = pitch;
-
-
-
-  hoverTimer+=dt;
-  if(hoverTimer>.12){
-   hoverTimer=0;camera.updateMatrixWorld();raycaster.setFromCamera(new THREE.Vector2(0,0),camera);
-   const hits=raycaster.intersectObjects(productMeshes,false);hoveredMesh=hits.length?hits[0].object:null;
-  }
+  camera.rotation.y=yaw;camera.rotation.x=pitch;
   renderer.render(scene,camera);
 }
 animate();
@@ -500,12 +817,11 @@ addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight);
 });
 
-// إخفاء شاشة التحميل
 setTimeout(() => {
   const l = document.getElementById('loader');
   l.style.opacity = 0;
   setTimeout(() => l.remove(), 800);
-}, 900);
+}, 1000);
 </script>
 </body>
 </html>
