@@ -42,6 +42,12 @@
   #keys { position:fixed; bottom:20px; left:24px; z-index:10; color:#e8e2d0; font-size:12px; background:rgba(30,28,25,.6); border:1px solid rgba(212,169,78,.3); padding:8px 16px; border-radius:30px; backdrop-filter:blur(8px); }
   #keys b { color:#ffd9a0; }
 
+#voice-controls{position:fixed;bottom:64px;left:24px;z-index:14;display:flex;gap:10px;flex-direction:column}
+#voice-controls[hidden]{display:none}
+#voice-controls button{width:46px;height:46px;border-radius:50%;border:1px solid rgba(212,169,78,.55);background:rgba(30,28,25,.78);font-size:20px;cursor:pointer;backdrop-filter:blur(8px);transition:.2s;line-height:1}
+#voice-controls button:hover{box-shadow:0 0 14px rgba(212,169,78,.5)}
+#voice-controls button.off{opacity:.45;filter:grayscale(.7)}
+@media(pointer:coarse),(max-width:650px){#voice-controls{bottom:calc(172px + env(safe-area-inset-bottom));left:calc(18px + env(safe-area-inset-left))}}
 canvas{touch-action:none}
 #mobile-stick{display:none;position:fixed;left:calc(18px + env(safe-area-inset-left));bottom:calc(18px + env(safe-area-inset-bottom));width:138px;height:138px;z-index:15;direction:ltr;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 #stick-base{position:relative;width:100%;height:100%;border-radius:50%;border:1px solid #ffd9a066;background:#241f2966;box-shadow:inset 0 0 25px #0002;touch-action:none}
@@ -69,6 +75,7 @@ body.panel-open #mobile-stick{visibility:hidden}
   }
 }
 </script>
+<base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -101,6 +108,10 @@ body.panel-open #mobile-stick{visibility:hidden}
 
 <div id="keys">⬆️ السلم الكهربائي: قف عند السهم الأخضر</div>
 <div id="zone-badge">📍 <span id="zone">الطابق الأرضي — الممر الرئيسي</span></div>
+<div id="voice-controls" hidden>
+  <button id="mic-button" type="button" title="تشغيل / كتم المايك" aria-pressed="false">🎤</button>
+  <button id="speaker-button" type="button" title="كتم الاستماع" aria-pressed="false">🔊</button>
+</div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -717,7 +728,8 @@ document.getElementById('room-submit').textContent=invited?'الانضمام ل�
 socialButton.hidden=!settings.multiplayer_enabled||new URLSearchParams(location.search).has('preview');
 socialButton.onclick=()=>{clearMovement();roomDialog.showModal();};
 if(invited&&!socialButton.hidden)roomDialog.showModal();
-setInterval(async()=>{if(!roomConnected||!roomId)return;try{const valid=requireOK(await cloudDB.rpc('shop_can_join_topic',{topic:'shop:'+roomId}));if(!valid){await cloudDB.removeChannel(roomChannel);roomChannel=null;roomConnected=false;peers.forEach(p=>{scene.remove(p.object);disposeObject(p.object)});peers.clear();socialButton.textContent='دخول عام';document.getElementById('room-status').textContent='انتهت صلاحية الجلسة. غادر ثم ادخل مجددًا.';roomDialog.showModal();clearMovement();}}catch{}},60000);
+setInterval(async()=>{if(!roomConnected||!roomId)return;try{const valid=requireOK(await cloudDB.rpc('shop_can_join_topic',{topic:'shop:'+roomId}));if(!valid){await cloudDB.removeChannel(roomChannel);roomChannel=null;roomConnected=false;peers.forEach(p=>{scene.remove(p.object);disposeObject(p.object)});peers.clear();teardownVoice();updateVoiceButtons();
+ socialButton.textContent='دخول عام';document.getElementById('room-status').textContent='انتهت صلاحية الجلسة. غادر ثم ادخل مجددًا.';roomDialog.showModal();clearMovement();}}catch{}},60000);
 document.getElementById('room-close').onclick=()=>roomDialog.close();
 document.getElementById('room-copy').onclick=async()=>{
  try{await navigator.clipboard.writeText(location.href);document.getElementById('room-status').textContent='تم نسخ رابط الدعوة. أرسله لأخوك.';}
@@ -728,6 +740,7 @@ document.getElementById('room-leave').onclick=async()=>{
  peers.forEach(p=>{scene.remove(p.object);disposeObject(p.object);});peers.clear();
  document.getElementById('room-copy').hidden=true;document.getElementById('room-leave').hidden=true;
  document.getElementById('room-form').hidden=false;document.getElementById('room-status').textContent='غادرت الغرفة.';
+ teardownVoice();updateVoiceButtons();
  socialButton.textContent='تسوق مع غيرك';
  history.replaceState(null,'',location.pathname+location.search);
 };
@@ -751,7 +764,12 @@ function makeVisitor(name,id){
  const tex=new THREE.CanvasTexture(cv);tex.colorSpace=THREE.SRGBColorSpace;
  const label=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false}));label.position.y=2.18;label.scale.set(1.65,.4125,1);object.add(label);
  object.position.set(settings.spawn_x,0,settings.spawn_z);scene.add(object);
- return{object,target:new THREE.Vector3(settings.spawn_x,0,settings.spawn_z),zone:null,storeId:null,yaw:0,lastSeen:Date.now()};
+ const indCv=document.createElement('canvas');indCv.width=128;indCv.height=128;
+ const indCtx=indCv.getContext('2d');indCtx.font='88px serif';indCtx.textAlign='center';indCtx.textBaseline='middle';indCtx.fillText('\u{1F5E3}\uFE0F',64,70);
+ const indTex=new THREE.CanvasTexture(indCv);indTex.colorSpace=THREE.SRGBColorSpace;
+ const indicator=new THREE.Sprite(new THREE.SpriteMaterial({map:indTex,depthTest:false,transparent:true}));
+ indicator.position.y=2.78;indicator.scale.set(.6,.6,1);indicator.visible=false;object.add(indicator);
+ return{object,indicator,target:new THREE.Vector3(settings.spawn_x,0,settings.spawn_z),zone:null,storeId:null,yaw:0,lastSeen:Date.now()};
 }
 function syncVisitors(){
  const state=roomChannel.presenceState(),active=new Set();
@@ -762,6 +780,7 @@ function syncVisitors(){
  }
  for(const [id,p] of peers)if(!active.has(id)){scene.remove(p.object);disposeObject(p.object);peers.delete(id);}
  socialButton.textContent=(publicRoom?'المول العام':'الغرفة الخاصة')+' · '+(peers.size+1)+' أشخاص';
+ syncVoicePeers();
 }
 function updateVisitors(dt){
  for(const p of peers.values()){
@@ -808,7 +827,8 @@ document.getElementById('room-form').onsubmit=async(e)=>{
     if(payload.zone==='shop'&&(Math.abs(payload.x-200)>50||!mallStoreRows.some(s=>s.id===payload.storeId)))return;
     p.zone=payload.zone;p.storeId=payload.storeId;p.target.set(payload.x,payload.y,payload.z);
     p.yaw=payload.yaw;p.lastSeen=Date.now();
-   });
+   })
+   .on('broadcast',{event:'voice-signal'},({payload})=>{handleVoiceSignal(payload);});
   await new Promise((resolve,reject)=>{
    const timer=setTimeout(()=>reject(new Error('تعذر الاتصال بالغرفة. تحقق من إعدادات Realtime والسياسات.')),12000);
    roomChannel.subscribe(async status=>{
@@ -826,6 +846,7 @@ document.getElementById('room-form').onsubmit=async(e)=>{
   document.getElementById('room-copy').hidden=publicRoom;document.getElementById('room-leave').hidden=false;
   document.getElementById('room-status').textContent=publicRoom?'أنت في المول العام. الزوار الذين يختارون الدخول العام يظهرون معك؛ حتى 12 حساباً في المجموعة.':'متصل بغرفة خاصة. انسخ رابط الدعوة ليشاركك غيرك. الدعوة صالحة 24 ساعة، حتى 12 حساباً.';
   roomDialog.close();
+  updateVoiceButtons();initVoice();
  }catch(error){
   document.getElementById('room-status').textContent=/mall_join_public|mall_public_heartbeat/.test(error.message)?'فعّل الدخول العام بتشغيل mall-public-entry.sql في Supabase ثم أعد المحاولة.':error.message;
   if(!roomConnected&&roomChannel){await cloudDB.removeChannel(roomChannel);roomChannel=null;}
@@ -843,6 +864,142 @@ if(cloudReady)setInterval(async()=>{
  if(signature!==catalogueSignature){const note=document.getElementById('db-note');note.hidden=false;note.replaceChildren(document.createTextNode('توفرت تحديثات للمول. '));const button=document.createElement('button');button.textContent='عرض التحديثات';button.onclick=()=>location.reload();note.append(button);catalogueSignature=signature;}}
  catch(error){console.warn('Catalogue refresh unavailable:',error.message);}finally{checkingCatalogue=false;}
 },30000);
+
+
+/* ============================================================
+   🎤 المحادثة الصوتية للقريبين — WebRTC mesh عبر قناة الغرفة
+   - الصوت يخف مع المسافة وينقطع خارج نفس الطابق/المحل
+   - إشارة الاتصال (SDP/ICE) تمر عبر broadcast الموجود
+   - لا يحتاج SQL جديد ولا سيرفر صوتي
+   ============================================================ */
+const VOICE_RADIUS=13; // أقصى مسافة سماع بالمتر
+const voice={enabled:false,localStream:null,muted:true,speakersMuted:false,peers:new Map(),audioCtx:null};
+const voiceControls=document.getElementById('voice-controls'),micButton=document.getElementById('mic-button'),speakerButton=document.getElementById('speaker-button');
+function updateVoiceButtons(){
+ const show=roomConnected&&voice.enabled;
+ voiceControls.hidden=!show;
+ micButton.textContent=voice.muted?'\u{1F3A4}':'\u{1F5E3}\uFE0F';
+ micButton.classList.toggle('off',voice.muted);
+ micButton.setAttribute('aria-pressed',String(!voice.muted));
+ speakerButton.textContent=voice.speakersMuted?'\u{1F507}':'\u{1F50A}';
+ speakerButton.classList.toggle('off',voice.speakersMuted);
+ speakerButton.setAttribute('aria-pressed',String(voice.speakersMuted));
+}
+function sendVoiceSignal(to,data){
+ if(roomChannel&&roomConnected)roomChannel.send({type:'broadcast',event:'voice-signal',payload:{to,from:connectionId,data}});
+}
+function createPeerConnection(id){
+ const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
+ const state={pc,stream:new MediaStream(),gain:null,analyser:null,buf:null,talking:false,wired:false};
+ voice.localStream.getTracks().forEach(t=>pc.addTrack(t,voice.localStream));
+ pc.onicecandidate=e=>{if(e.candidate)sendVoiceSignal(id,{type:'ice',candidate:e.candidate});};
+ pc.ontrack=e=>{
+  e.streams[0].getAudioTracks().forEach(t=>{if(!state.stream.getTracks().includes(t))state.stream.addTrack(t);});
+  if(!state.wired&&state.stream.getAudioTracks().length){state.wired=true;wirePeerAudio(state);}
+ };
+ pc.onconnectionstatechange=()=>{if(['failed','closed'].includes(pc.connectionState))removeVoicePeer(id);};
+ voice.peers.set(id,state);
+ return state;
+}
+function wirePeerAudio(v){
+ try{
+  const src=voice.audioCtx.createMediaStreamSource(v.stream);
+  v.analyser=voice.audioCtx.createAnalyser();v.analyser.fftSize=512;v.buf=new Float32Array(v.analyser.fftSize);
+  v.gain=voice.audioCtx.createGain();v.gain.gain.value=0;
+  src.connect(v.analyser);v.analyser.connect(v.gain);v.gain.connect(voice.audioCtx.destination);
+ }catch(e){console.warn('voice wiring',e);}
+}
+function removeVoicePeer(id){
+ const v=voice.peers.get(id);if(!v)return;
+ try{v.pc.close();}catch{}
+ voice.peers.delete(id);
+}
+async function startVoiceOffer(id){
+ if(!voice.enabled||voice.peers.has(id)||peers.size>=12)return;
+ if(connectionId>id)return; // الطرف الأصغر معرفاً يبدأ العرض
+ const st=createPeerConnection(id);
+ try{
+  const offer=await st.pc.createOffer();
+  await st.pc.setLocalDescription(offer);
+  sendVoiceSignal(id,{type:'offer',sdp:st.pc.localDescription});
+ }catch(e){console.warn('voice offer',e);removeVoicePeer(id);}
+}
+async function handleVoiceSignal(payload){
+ if(!voice.enabled||!payload)return;
+ const{from,to,data}=payload;
+ if(to!==connectionId||from===connectionId||!peers.has(from)||!data)return;
+ let st=voice.peers.get(from);
+ try{
+  if(data.type==='offer'){
+   if(!st)st=createPeerConnection(from);
+   await st.pc.setRemoteDescription(data.sdp);
+   const answer=await st.pc.createAnswer();
+   await st.pc.setLocalDescription(answer);
+   sendVoiceSignal(from,{type:'answer',sdp:st.pc.localDescription});
+  }else if(data.type==='answer'){
+   if(!st)return;
+   await st.pc.setRemoteDescription(data.sdp);
+  }else if(data.type==='ice'){
+   if(!st)return;
+   await st.pc.addIceCandidate(data.candidate);
+  }
+ }catch(e){console.warn('voice signal',e);}
+}
+function syncVoicePeers(){
+ if(!voice.enabled)return;
+ for(const[id]of peers)if(!voice.peers.has(id)&&connectionId<id)startVoiceOffer(id);
+ for(const id of[...voice.peers.keys()])if(!peers.has(id))removeVoicePeer(id);
+}
+async function initVoice(){
+ if(voice.enabled||!navigator.mediaDevices?.getUserMedia)return;
+ try{
+  voice.audioCtx=voice.audioCtx||new(window.AudioContext||window.webkitAudioContext)();
+  voice.localStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+  voice.enabled=true;voice.muted=true;
+  voice.localStream.getAudioTracks().forEach(t=>t.enabled=false);
+  updateVoiceButtons();syncVoicePeers();
+ }catch(e){
+  console.warn('mic unavailable',e);
+  showToast('\u{1F3A4} المايك غير متاح — المحادثة الصوتية معطلة');
+ }
+}
+function teardownVoice(){
+ for(const id of[...voice.peers.keys()])removeVoicePeer(id);
+ if(voice.localStream){voice.localStream.getTracks().forEach(t=>t.stop());voice.localStream=null;}
+ voice.enabled=false;voice.muted=true;
+}
+micButton.onclick=async()=>{
+ if(!voice.enabled){await initVoice();if(!voice.enabled)return;}
+ if(voice.audioCtx.state==='suspended')await voice.audioCtx.resume();
+ voice.muted=!voice.muted;
+ voice.localStream.getAudioTracks().forEach(t=>t.enabled=!voice.muted);
+ updateVoiceButtons();
+};
+speakerButton.onclick=()=>{voice.speakersMuted=!voice.speakersMuted;updateVoiceButtons();};
+function updateVoice(dt){
+ if(!voice.enabled)return;
+ if(voice.audioCtx.state==='suspended')voice.audioCtx.resume().catch(()=>{});
+ const cx=voice.audioCtx.currentTime;
+ voice.peers.forEach((v,id)=>{
+  const p=peers.get(id);
+  let g=0;
+  if(p&&!voice.speakersMuted){
+   const samePlace=p.zone===zone&&(zone!=='shop'||p.storeId===(activeStore?.id??null));
+   if(samePlace){
+    const d=Math.hypot(p.target.x-camera.position.x,(p.target.y+1.55)-camera.position.y,p.target.z-camera.position.z);
+    if(d<VOICE_RADIUS)g=Math.pow(1-d/VOICE_RADIUS,1.6);
+   }
+  }
+  if(v.gain)v.gain.gain.setTargetAtTime(g,cx,.08);
+  let talking=false;
+  if(v.analyser&&g>.02){
+   v.analyser.getFloatTimeDomainData(v.buf);
+   let sum=0;for(let i=0;i<v.buf.length;i++)sum+=v.buf[i]*v.buf[i];
+   talking=Math.sqrt(sum/v.buf.length)>.018;
+  }
+  if(p&&p.indicator&&talking!==v.talking){v.talking=talking;p.indicator.visible=talking;}
+ });
+}
 
 /* ---------- الحلقة ---------- */
 const clock = new THREE.Clock();
@@ -939,7 +1096,7 @@ function animate() {
   }
 
   camera.rotation.y=yaw;camera.rotation.x=pitch;
-  updateVisitors(dt);renderer.render(scene,camera);
+  updateVisitors(dt);updateVoice(dt);renderer.render(scene,camera);
 }
 animate();
 
