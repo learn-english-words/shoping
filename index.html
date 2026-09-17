@@ -51,6 +51,15 @@ canvas{touch-action:none}
 body.panel-open #mobile-stick{visibility:hidden}
 @media(pointer:coarse),(max-width:650px),(max-height:500px){#mobile-stick{display:block}#keys,#hint{display:none}#header{padding:calc(12px + env(safe-area-inset-top)) 16px 12px}#header .logo{font-size:18px}#zone-badge{bottom:calc(16px + env(safe-area-inset-bottom));right:calc(16px + env(safe-area-inset-right));font-size:10px;max-width:calc(100vw - 190px);padding:8px 10px}#panel{max-height:calc(100dvh - 28px);overflow:auto}#toast{max-width:88vw;text-align:center;font-size:12px}}
 @media(max-height:500px){#mobile-stick{width:112px;height:112px;bottom:calc(12px + env(safe-area-inset-bottom));left:calc(12px + env(safe-area-inset-left))}#p-img{height:100px}#panel{padding:18px}}
+#social-button{position:fixed;top:calc(14px + env(safe-area-inset-top));left:calc(14px + env(safe-area-inset-left));z-index:14;border:1px solid #d8c39e;background:#26374de6;color:#fff;padding:10px 14px;border-radius:10px;font-size:12px}
+#social-button[hidden],#connection-note[hidden]{display:none}
+#room-dialog{margin:auto;padding:26px;width:min(410px,calc(100vw - 32px));max-height:90dvh;overflow:auto;border:1px solid #d8c39e;border-radius:18px;background:#faf8f2;color:#26374d}
+#room-dialog::backdrop{background:#192b3d66}#room-dialog h2{font-size:22px;margin-bottom:14px}#room-dialog p{font-size:13px;line-height:1.9;margin:12px 0}
+#room-close{float:left;border:0;background:none;color:#26374d;font-size:18px}#room-dialog input{width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;margin:10px 0;background:white}
+#room-dialog label{font-size:12px}#room-submit,#room-copy,#room-leave{padding:12px 16px;border:0;background:#26374d;color:white;border-radius:9px}#room-submit{width:100%}.room-actions{display:flex;gap:8px}#room-leave{background:#e8e2d5;color:#26374d}
+@media(max-height:500px){#room-dialog{padding:18px}}
+
+#social-button{top:76px} #db-note{position:fixed;bottom:64px;right:16px;max-width:300px;padding:10px;border-radius:10px;background:#fff0cf;color:#634b2b;font-size:12px;z-index:25} #db-note[hidden]{display:none}
 </style>
 <script type="importmap">
 {
@@ -63,7 +72,13 @@ body.panel-open #mobile-stick{visibility:hidden}
 <base target="_blank">
 </head>
 <body>
-<div id="app"></div><div id="mobile-stick" aria-label="عصا التحكم بالمشي"><div id="stick-base" role="group" aria-label="اسحب الدائرة للمشي"><div id="stick-ring"></div><div id="stick-knob"></div></div></div>
+<div id="app"></div><div id="db-note" role="status" hidden></div><button id="social-button" hidden>تسوق مع غيرك</button>
+<dialog id="room-dialog"><button id="room-close" aria-label="إغلاق" type="button">✕</button><h2 id="room-title">تسوقوا مع بعض</h2><p>ادخل باسمك وأرسل رابط الغرفة لأخوك. تظهرون كشخصيات داخل المول.</p>
+<form id="room-form"><label for="visitor-name">اسمك</label><input id="visitor-name" maxlength="24" required autocomplete="nickname"><button id="room-submit">إنشاء غرفة دعوة</button></form>
+<p id="room-status" role="status" aria-live="polite"></p><input id="invite-link" dir="ltr" readonly hidden aria-label="رابط الدعوة"><div class="room-actions"><button id="room-copy" hidden>نسخ رابط الدعوة</button><button id="room-leave" hidden>مغادرة الغرفة</button></div></dialog>
+
+
+<div id="mobile-stick" aria-label="عصا التحكم بالمشي"><div id="stick-base" role="group" aria-label="اسحب الدائرة للمشي"><div id="stick-ring"></div><div id="stick-knob"></div></div></div>
 
 <div id="loader"><h1>النيون مول</h1><p>NEON MALL · جاري الفتح ...</p></div>
 <div id="fade"></div>
@@ -90,40 +105,38 @@ body.panel-open #mobile-stick{visibility:hidden}
 <script type="module">
 import * as THREE from 'three';
 
+import {createDB,allRows,httpURL,requireOK} from './config.js';
+let settings={"id":1,"name":"النيون مول","slogan":"تسوق من مكانك","store_url":"","logo_url":"","floor_color":"#d9d2c4","wall_color":"#e9e2d2","shelf_color":"#253347","accent_color":"#d4a94e","light_color":"#fff2e0","light_intensity":1.15,"room_width":34,"room_depth":34,"room_height":12,"spawn_x":0,"spawn_z":22,"spawn_yaw":0,"walk_speed":4,"multiplayer_enabled":true},mallStoreRows=[{"id":"ground-0","name":"🎮 قيمنق ستور","side":-1,"z":-18,"floor":0,"color":"#7b2ff7","open":false,"enabled":true,"store_url":""},{"id":"ground-1","name":"🎧 ساوند سيتي","side":-1,"z":-9,"floor":0,"color":"#00a8b5","open":false,"enabled":true,"store_url":""},{"id":"ground-2","name":"👟 سنيكرز هب","side":-1,"z":0,"floor":0,"color":"#00b36b","open":false,"enabled":true,"store_url":""},{"id":"ground-3","name":"☕ قهوة رقمية","side":-1,"z":9,"floor":0,"color":"#d4a94e","open":false,"enabled":true,"store_url":""},{"id":"ground-4","name":"💻 تك زون","side":1,"z":-18,"floor":0,"color":"#00a8b5","open":false,"enabled":true,"store_url":""},{"id":"ground-5","name":"👜 ستايل بوتيك","side":1,"z":-9,"floor":0,"color":"#d45494","open":false,"enabled":true,"store_url":""},{"id":"accessories","name":"📱 إكسسواراتك","side":1,"z":0,"floor":0,"color":"#d4a94e","open":true,"enabled":true,"store_url":""},{"id":"ground-7","name":"🕶️ أوبتكس","side":1,"z":9,"floor":0,"color":"#7b2ff7","open":false,"enabled":true,"store_url":""},{"id":"upper-0","name":"🍔 برجر نيون","side":-1,"z":-18,"floor":1,"color":"#d4543a","open":false,"enabled":true,"store_url":""},{"id":"upper-1","name":"🍦 آيس كريم لاب","side":-1,"z":-9,"floor":1,"color":"#d48fb0","open":false,"enabled":true,"store_url":""},{"id":"upper-2","name":"📚 مكتبة المول","side":-1,"z":0,"floor":1,"color":"#4a7bd4","open":false,"enabled":true,"store_url":""},{"id":"upper-3","name":"🎬 سينما مول","side":-1,"z":9,"floor":1,"color":"#8a2fd4","open":false,"enabled":true,"store_url":""},{"id":"upper-4","name":"🏋️ فتنس زون","side":1,"z":-18,"floor":1,"color":"#3ad48a","open":false,"enabled":true,"store_url":""},{"id":"upper-5","name":"🧸 عالم الأطفال","side":1,"z":-9,"floor":1,"color":"#d4b02f","open":false,"enabled":true,"store_url":""},{"id":"upper-6","name":"💈 صالون النيون","side":1,"z":9,"floor":1,"color":"#2fa8d4","open":false,"enabled":true,"store_url":""},{"id":"upper-7","name":"🛋️ هوم ستايل","side":1,"z":-27,"floor":1,"color":"#b56a3a","open":false,"enabled":true,"store_url":""}],screenRows=[{"id":"ad-1","title":"عرض اليوم","subtitle":"خصم 30% على الكفرات","floor":0,"x":0,"z":-27,"center_y":3.5,"rotation":0,"hanging":true,"width":2.9,"height":1.7,"image_url":"","link_url":"","enabled":true},{"id":"ad-2","title":"شحن مجاني","subtitle":"للطلبات فوق 200 ر.س","floor":0,"x":0,"z":23,"center_y":3.5,"rotation":0,"hanging":true,"width":2.9,"height":1.7,"image_url":"","link_url":"","enabled":true},{"id":"ad-3","title":"وصل حديثاً","subtitle":"سماعات الألعاب","floor":1,"x":0,"z":-27,"center_y":3.15,"rotation":0,"hanging":true,"width":2.9,"height":1.7,"image_url":"","link_url":"","enabled":true},{"id":"ad-4","title":"باور بانك","subtitle":"سعة 20000mAh","floor":1,"x":0,"z":23,"center_y":3.15,"rotation":0,"hanging":true,"width":2.9,"height":1.7,"image_url":"","link_url":"","enabled":true},{"id":"ad-5","title":"إعلانك هنا","subtitle":"مساحة إعلانية متاحة","floor":0,"x":-12.38,"z":-13.5,"center_y":2.35,"rotation":90,"hanging":false,"width":2.35,"height":1.4,"image_url":"","link_url":"","enabled":true},{"id":"ad-6","title":"حماية شاشة","subtitle":"تركيب داخل المحل","floor":0,"x":12.38,"z":4.5,"center_y":2.35,"rotation":-90,"hanging":false,"width":2.35,"height":1.4,"image_url":"","link_url":"","enabled":true},{"id":"ad-7","title":"عرض اليوم","subtitle":"تسوق من مكانك","floor":1,"x":-12.38,"z":4.5,"center_y":2.15,"rotation":90,"hanging":false,"width":2.35,"height":1.4,"image_url":"","link_url":"","enabled":true},{"id":"ad-8","title":"شحن مجاني","subtitle":"للطلبات فوق 200 ر.س","floor":1,"x":12.38,"z":-13.5,"center_y":2.15,"rotation":-90,"hanging":false,"width":2.35,"height":1.4,"image_url":"","link_url":"","enabled":true}];
+let shelfRows=[{"id":"shelf-1","name":"كفرات 1","category":"كفرات","x":-11,"z":-14.5,"rotation":0,"width":5,"height":6.2,"depth":1.1,"enabled":true,"store_id":"accessories"},{"id":"shelf-2","name":"كفرات 2","category":"كفرات","x":-5.5,"z":-14.5,"rotation":0,"width":5,"height":6.2,"depth":1.1,"enabled":true,"store_id":"accessories"},{"id":"shelf-3","name":"سماعات 3","category":"سماعات","x":0,"z":-14.5,"rotation":0,"width":5,"height":6.2,"depth":1.1,"enabled":true,"store_id":"accessories"},{"id":"shelf-4","name":"سماعات 4","category":"سماعات","x":5.5,"z":-14.5,"rotation":0,"width":5,"height":6.2,"depth":1.1,"enabled":true,"store_id":"accessories"},{"id":"shelf-5","name":"شواحن 5","category":"شواحن","x":11,"z":-14.5,"rotation":0,"width":5,"height":6.2,"depth":1.1,"enabled":true,"store_id":"accessories"},{"id":"shelf-6","name":"شواحن 6","category":"شواحن","x":-14.5,"z":-8,"rotation":90,"width":5,"height":6.2,"depth":1.1,"enabled":true,"store_id":"accessories"},{"id":"shelf-7","name":"حماية 7","category":"حماية","x":-14.5,"z":-2,"rotation":90,"width":5,"height":6.2,"depth":1.1,"enabled":true,"store_id":"accessories"},{"id":"shelf-8","name":"حماية 8","category":"حماية","x":-14.5,"z":4,"rotation":90,"width":5,"height":6.2,"depth":1.1,"enabled":true,"store_id":"accessories"},{"id":"shelf-9","name":"إكسسوارات 9","category":"إكسسوارات","x":14.5,"z":-8,"rotation":-90,"width":5,"height":6.2,"depth":1.1,"enabled":true,"store_id":"accessories"},{"id":"shelf-10","name":"إكسسوارات 10","category":"إكسسوارات","x":14.5,"z":-2,"rotation":-90,"width":5,"height":6.2,"depth":1.1,"enabled":true,"store_id":"accessories"},{"id":"shelf-11","name":"كفرات 11","category":"كفرات","x":14.5,"z":4,"rotation":-90,"width":5,"height":6.2,"depth":1.1,"enabled":true,"store_id":"accessories"},{"id":"shelf-12","name":"إكسسوارات 12","category":"إكسسوارات","x":14.5,"z":10,"rotation":-90,"width":5,"height":6.2,"depth":1.1,"enabled":true,"store_id":"accessories"}],itemRows=[{"id":"k1","name":"كفر نيون — آيفون 15","price":59,"category":"كفرات","description":"كفر سيليكون مضاد للصدمات بتصميم نيون متوهج، حماية كاملة للكاميرا والشاشة.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-1","row_index":0,"slot_index":0,"page_index":0,"store_id":"accessories"},{"id":"k2","name":"كفر شفاف ماجنتك","price":45,"category":"كفرات","description":"كفر شفاف يدعم الشحن المغناطيسي MagSafe مع حواف مرتفعة لحماية إضافية.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-2","row_index":0,"slot_index":0,"page_index":0,"store_id":"accessories"},{"id":"k3","name":"كفر ألعاب LED","price":79,"category":"كفرات","description":"كفر للقيمرز بإضاءة LED متغيرة الألوان مع أزرار إضافية قابلة للبرمجة.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-11","row_index":0,"slot_index":0,"page_index":0,"store_id":"accessories"},{"id":"s1","name":"سماعة بلوتوث Pro","price":199,"category":"سماعات","description":"سماعة رأس لاسلكية بعزل ضوضاء نشط وبطارية تدوم 40 ساعة مع ميكروفون نقي.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-3","row_index":0,"slot_index":0,"page_index":0,"store_id":"accessories"},{"id":"s2","name":"سماعات أذن لاسلكية","price":149,"category":"سماعات","description":"سماعات TWS صغيرة بجودة صوت استوديو وعلبة شحن سريع، مقاومة للماء IPX5.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-4","row_index":0,"slot_index":0,"page_index":0,"store_id":"accessories"},{"id":"s3","name":"سماعة ألعاب RGB","price":229,"category":"سماعات","description":"سماعة قيمنق بصوت محيطي 7.1 ومايك بإلغاء الضوضاء وإضاءة RGB متزامنة.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-3","row_index":0,"slot_index":1,"page_index":0,"store_id":"accessories"},{"id":"c1","name":"شاحن سريع 65W","price":99,"category":"شواحن","description":"شاحن GaN صغير بقوة 65 واط يشحن الجوال واللابتوب، بمنفذين USB-C وUSB-A.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-5","row_index":0,"slot_index":0,"page_index":0,"store_id":"accessories"},{"id":"c2","name":"كيبل مغناطيسي 3 في 1","price":39,"category":"شواحن","description":"كيبل شحن مغناطيسي يدعم Lightning وUSB-C وMicro بطول 2 متر وقوة 100W.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-6","row_index":0,"slot_index":0,"page_index":0,"store_id":"accessories"},{"id":"c3","name":"باور بانك 20000mAh","price":129,"category":"شواحن","description":"بطارية متنقلة بسعة كبيرة وشاشة عرض رقمية، تشحن 3 أجهزة بنفس الوقت.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-5","row_index":0,"slot_index":1,"page_index":0,"store_id":"accessories"},{"id":"g1","name":"حماية شاشة سيراميك","price":35,"category":"حماية","description":"استيكر حماية سيراميك ناعم الملمس، مضاد للخدوش والبصمات وتركيب سهل.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-7","row_index":0,"slot_index":0,"page_index":0,"store_id":"accessories"},{"id":"g2","name":"عدسة حماية الكاميرا","price":25,"category":"حماية","description":"حلقة حماية معدنية للكاميرا بجودة لا تؤثر على جودة الصور، تركيب دقيق.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-8","row_index":0,"slot_index":0,"page_index":0,"store_id":"accessories"},{"id":"g3","name":"جراب حماية عسكري","price":69,"category":"حماية","description":"جراب بمعايير عسكرية مقاوم للسقوط من 3 أمتار مع حواف مطاطية ممتصة للصدمات.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-7","row_index":0,"slot_index":1,"page_index":0,"store_id":"accessories"},{"id":"a1","name":"حامل سيارة مغناطيسي","price":49,"category":"إكسسوارات","description":"حامل مغناطيسي قوي للسيارة مع دوران 360 درجة، ثبات عالي على الطريق.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-9","row_index":0,"slot_index":0,"page_index":0,"store_id":"accessories"},{"id":"a2","name":"حامل مكتب ألمنيوم","price":55,"category":"إكسسوارات","description":"حامل مكتبي من الألمنيوم بزوايا قابلة للتعديل، متوافق مع الجوال والتابلت.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-10","row_index":0,"slot_index":0,"page_index":0,"store_id":"accessories"},{"id":"a3","name":"قلم لمس ذكي","price":89,"category":"إكسسوارات","description":"قلم Stylus بدقة عالية وبطارية تدوم 10 ساعات، مثالي للرسم والتدوين.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-12","row_index":0,"slot_index":0,"page_index":0,"store_id":"accessories"},{"id":"a4","name":"استيكرات سكين نيون","price":19,"category":"إكسسوارات","description":"حزمة استيكرات مقاومة للماء بتصاميم نيون، تناسب الجوال واللابتوب.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-9","row_index":0,"slot_index":1,"page_index":0,"store_id":"accessories"},{"id":"a5","name":"كفر تبريد للقيمنق","price":75,"category":"كفرات","description":"كفر بشريط تبريد نحاسي يخفض حرارة الجوال أثناء الألعاب الطويلة.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-1","row_index":0,"slot_index":1,"page_index":0,"store_id":"accessories"},{"id":"a6","name":"سبيكر بلوتوث محمول","price":119,"category":"سماعات","description":"مكبر صوت صغير بصوت قوي 360 درجة وبطارية 12 ساعة ومقاومة للماء.","image_url":"","product_url":"","visible":true,"shelf_id":"shelf-4","row_index":0,"slot_index":1,"page_index":0,"store_id":"accessories"}],cloudDB=null,cloudReady=false;
+async function fetchCloud(){
+ const db=await createDB('wesam-visitor');
+ const [s,stores,screens,shelves,products]=await Promise.all([
+ db.from('shop_settings').select('*').eq('id',1).single().then(requireOK),allRows(db,'mall_stores'),allRows(db,'mall_screens'),allRows(db,'shop_shelves'),allRows(db,'shop_products')]);
+ return{db,s,stores,screens,shelves,products};
+}
+try{
+ const result=await Promise.race([fetchCloud(),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Connection timeout')),10000))]);
+ cloudDB=result.db;settings=result.s;mallStoreRows=result.stores;screenRows=result.screens;shelfRows=result.shelves;itemRows=result.products;cloudReady=true;
+}catch(error){
+ document.getElementById('db-note').hidden=false;
+ document.getElementById('db-note').textContent='نسخة تجريبية — قاعدة بيانات المول غير جاهزة أو غير متصلة.';
+ console.warn('Mall database unavailable:',error.message);
+}
+
+
 /* ============================================================
    ⬇️ إعداداتك — عدّل من هنا
    ============================================================ */
-const SALLA_STORE_URL = "https://salla.sa/YOUR-STORE"; // رابط متجرك
+document.title=settings.name+' — مول ثلاثي الأبعاد';
+const mallHeader=document.querySelector('#header .logo')||document.querySelector('#header');
+if(mallHeader){mallHeader.replaceChildren();if(httpURL(settings.logo_url)){const logo=document.createElement('img');logo.src=httpURL(settings.logo_url);logo.alt='';logo.style.cssText='height:30px;vertical-align:middle;margin-left:8px';mallHeader.append(logo);}mallHeader.append(document.createTextNode('🏬 '+settings.name));}
+const SALLA_STORE_URL=httpURL(settings.store_url); // رابط متجرك
 
 /* 📢 الإعلانات — غيّر العناوين والروابط، أو استبدلها بصور:
    { img:"https://رابط-الصورة.jpg", url:"https://رابط-الإعلان" } */
-const ADS = [
-  { title:"🔥 عرض اليوم",   sub:"خصم 30% على جميع الكفرات",      img:null, url:SALLA_STORE_URL },
-  { title:"🚚 شحن مجاني",   sub:"للطلبات فوق 200 ر.س",            img:null, url:SALLA_STORE_URL },
-  { title:"🎧 وصل حديثًا",  sub:"سماعات الألعاب RGB برو",        img:null, url:SALLA_STORE_URL },
-  { title:"📢 إعلانك هنا",  sub:"أجر مساحة إعلانية في المول",    img:null, url:"#" },
-  { title:"⚡ باور بانك",   sub:"سعة 20000mAh — الكمية محدودة",   img:null, url:SALLA_STORE_URL },
-  { title:"🛡️ حماية شاشة", sub:"تركيب مجاني داخل المحل",        img:null, url:SALLA_STORE_URL },
-];
+const ADS=screenRows.map(ad=>({...ad,sub:ad.subtitle,img:httpURL(ad.image_url)||null,url:httpURL(ad.link_url)}));
 
-const products = [
-  { id:"k1", name:"كفر نيون — آيفون 15",  price:59,  cat:"كفرات",     icon:"📱", color:0xff2fd6, desc:"كفر سيليكون مضاد للصدمات بتصميم نيون متوهج." },
-  { id:"k2", name:"كفر شفاف ماجنتك",      price:45,  cat:"كفرات",     icon:"📱", color:0x00f0ff, desc:"يدعم MagSafe مع حواف مرتفعة للحماية." },
-  { id:"k3", name:"كفر ألعاب LED",        price:79,  cat:"كفرات",     icon:"🎮", color:0x7b2ff7, desc:"إضاءة LED متغيرة مع أزرار إضافية." },
-  { id:"s1", name:"سماعة بلوتوث Pro",     price:199, cat:"سماعات",    icon:"🎧", color:0x00ff9d, desc:"عزل ضوضاء نشط وبطارية 40 ساعة." },
-  { id:"s2", name:"سماعات أذن لاسلكية",   price:149, cat:"سماعات",    icon:"🎧", color:0xffe600, desc:"جودة صوت استوديو ومقاومة ماء IPX5." },
-  { id:"s3", name:"سماعة ألعاب RGB",      price:229, cat:"سماعات",    icon:"🎧", color:0xff2fd6, desc:"صوت محيطي 7.1 ومايك بإلغاء الضوضاء." },
-  { id:"c1", name:"شاحن سريع 65W",        price:99,  cat:"شواحن",     icon:"🔌", color:0x00f0ff, desc:"شاحن GaN صغير بمنفذين USB-C وA." },
-  { id:"c2", name:"كيبل مغناطيسي 3 في 1", price:39,  cat:"شواحن",     icon:"🔌", color:0x7b2ff7, desc:"يدعم Lightning وUSB-C وMicro." },
-  { id:"c3", name:"باور بانك 20000mAh",   price:129, cat:"شواحن",     icon:"🔋", color:0x00ff9d, desc:"يشحن 3 أجهزة بنفس الوقت مع شاشة." },
-  { id:"g1", name:"حماية شاشة سيراميك",   price:35,  cat:"حماية",     icon:"🛡️", color:0xffe600, desc:"ناعم الملمس مضاد للخدوش والبصمات." },
-  { id:"g2", name:"عدسة حماية الكاميرا",  price:25,  cat:"حماية",     icon:"🛡️", color:0x00f0ff, desc:"حلقة معدنية لا تؤثر على جودة الصور." },
-  { id:"g3", name:"جراب حماية عسكري",     price:69,  cat:"حماية",     icon:"🛡️", color:0xff2fd6, desc:"مقاوم للسقوط من 3 أمتار." },
-  { id:"a1", name:"حامل سيارة مغناطيسي",  price:49,  cat:"إكسسوارات", icon:"🚗", color:0x7b2ff7, desc:"دوران 360 درجة وثبات عالي." },
-  { id:"a2", name:"حامل مكتب ألمنيوم",    price:55,  cat:"إكسسوارات", icon:"🖥️", color:0x00ff9d, desc:"زوايا قابلة للتعديل للجوال والتابلت." },
-  { id:"a3", name:"قلم لمس ذكي",          price:89,  cat:"إكسسوارات", icon:"✏️", color:0xffe600, desc:"دقة عالية وبطارية 10 ساعات." },
-  { id:"a4", name:"استيكرات سكين نيون",   price:19,  cat:"إكسسوارات", icon:"✨", color:0xff2fd6, desc:"مقاومة للماء بتصاميم نيون متنوعة." },
-];
+const products=itemRows.filter(p=>p.visible).map(p=>({...p,cat:p.category,desc:p.description,image:p.image_url,url:p.product_url,color:0x6d94a8}));
 /* ============================================================ */
 
 const scene = new THREE.Scene();
@@ -132,7 +145,7 @@ scene.fog = new THREE.Fog(0x0a0a0e, 40, 110);
 
 const camera = new THREE.PerspectiveCamera(65, innerWidth/innerHeight, 0.1, 250);
 camera.rotation.order = 'YXZ';
-camera.position.set(0, 1.7, 22);
+camera.position.set(settings.spawn_x,1.7,settings.spawn_z);
 
 const renderer = new THREE.WebGLRenderer({ antialias:true });
 renderer.setSize(innerWidth, innerHeight);
@@ -157,8 +170,8 @@ function makeSign(text, color, size=90, w=1024, h=200) {
 }
 
 /* ---------- إضاءة دافئة واقعية ---------- */
-scene.add(new THREE.AmbientLight(0xfff2e0, 1.15));
-const sun = new THREE.DirectionalLight(0xfff6e8, 1.3);
+scene.add(new THREE.AmbientLight(settings.light_color,settings.light_intensity));
+const sun = new THREE.DirectionalLight(settings.light_color,1.2);
 sun.position.set(12, 22, 10); sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
 sun.shadow.camera.left = -40; sun.shadow.camera.right = 40;
@@ -178,11 +191,11 @@ const warmF = new THREE.PointLight(0xffe0b3, 35, 25); warmF.position.set(0, 9, -
 
 /* ---------- ألوان واقعية ---------- */
 const MAT = {
-  floor:  new THREE.MeshStandardMaterial({ color:0xd9d2c4, roughness:0.25, metalness:0.08 }),
+  floor:  new THREE.MeshStandardMaterial({ color:settings.floor_color, roughness:0.25, metalness:0.08 }),
   slab:   new THREE.MeshStandardMaterial({ color:0xcfc8ba, roughness:0.4 }),
-  wall:   new THREE.MeshStandardMaterial({ color:0xe9e2d2, roughness:0.9, side:THREE.BackSide }),
+  wall:   new THREE.MeshStandardMaterial({ color:settings.wall_color, roughness:0.9, side:THREE.BackSide }),
   ceil:   new THREE.MeshStandardMaterial({ color:0xf2ede2, roughness:0.95, side:THREE.BackSide }),
-  gold:   new THREE.MeshStandardMaterial({ color:0xd4a94e, roughness:0.3, metalness:0.8 }),
+  gold:   new THREE.MeshStandardMaterial({ color:settings.accent_color, roughness:0.3, metalness:0.8 }),
   glass:  new THREE.MeshStandardMaterial({ color:0xbfe8ee, roughness:0.05, metalness:0.4, transparent:true, opacity:0.25 }),
   dark:   new THREE.MeshStandardMaterial({ color:0x2a2a30, roughness:0.5, metalness:0.6 }),
   escal:  new THREE.MeshStandardMaterial({ color:0x9aa0a8, roughness:0.35, metalness:0.85 }),
@@ -324,27 +337,10 @@ const doors = [];
 const neonPulses = [];
 const adScreens = [];
 
-const mallStoresF0 = [
-  { name:"🎮 قيمنق ستور",  side:-1, z:-18, color:0x7b2ff7, open:false },
-  { name:"🎧 ساوند سيتي",  side:-1, z:-9,  color:0x00a8b5, open:false },
-  { name:"👟 سنيكرز هب",   side:-1, z:0,   color:0x00b36b, open:false },
-  { name:"☕ قهوة رقمية",  side:-1, z:9,   color:0xd4a94e, open:false },
-  { name:"💻 تك زون",      side: 1, z:-18, color:0x00a8b5, open:false },
-  { name:"👜 ستايل بوتيك", side: 1, z:-9,  color:0xd45494, open:false },
-  { name:"📱 إكسسواراتك",  side: 1, z:0,   color:0xd4a94e, open:true  },
-  { name:"🕶️ أوبتكس",      side: 1, z:9,   color:0x7b2ff7, open:false },
-];
-const mallStoresF1 = [
-  { name:"🍔 برجر نيون",   side:-1, z:-18, color:0xd4543a, open:false },
-  { name:"🍦 آيس كريم لاب",side:-1, z:-9,  color:0xd48fb0, open:false },
-  { name:"📚 مكتبة المول", side:-1, z:0,   color:0x4a7bd4, open:false },
-  { name:"🎬 سينما مول",   side:-1, z:9,   color:0x8a2fd4, open:false },
-  { name:"🏋️ فتنس زون",    side: 1, z:-18, color:0x3ad48a, open:false },
-  { name:"🧸 عالم الأطفال",side: 1, z:-9,  color:0xd4b02f, open:false },
-  { name:"💈 صالون النيون",side: 1, z:9,   color:0x2fa8d4, open:false },
-  { name:"🛋️ هوم ستايل",   side: 1, z:-24, color:0xb56a3a, open:false },
-];
 
+const storefronts=mallStoreRows.filter(s=>s.enabled).map(s=>({...s,color:new THREE.Color(s.color).getHex()}));
+const mallStoresF0=storefronts.filter(s=>s.floor===0);
+const mallStoresF1=storefronts.filter(s=>s.floor===1);
 function buildStorefront(st, y) {
   const x = st.side * (HALL_W/2 - 0.4);
   const facing = st.side === 1 ? -Math.PI/2 : Math.PI/2;
@@ -386,10 +382,10 @@ mallStoresF0.forEach(s => buildStorefront(s, 0));
 mallStoresF1.forEach(s => buildStorefront(s, LEVEL_Y));
 
 /* لافتة المول */
-const mallSign = makeSign('🏬 النيون مول', '#d4a94e', 110);
+const mallSign = makeSign(settings.name,settings.accent_color,110);
 mallSign.position.set(0, 12, -HALL_L/2 + .3);
 scene.add(mallSign);
-const mallSign2 = makeSign('✦ تسوّق من مكانك ✦', '#8a7a55', 60);
+const mallSign2 = makeSign(settings.slogan,'#8a7a55',60);
 mallSign2.position.set(0, 10.2, -HALL_L/2 + .3);
 scene.add(mallSign2);
 
@@ -431,13 +427,13 @@ function makeAdTexture(ad, i) {
   ctx.font = '32px Tahoma';
   ctx.fillStyle = `hsl(${h}, 100%, 82%)`;
   ctx.fillText(ad.sub, 256, 195);
-  const tex = new THREE.CanvasTexture(cv);
+  const tex = new THREE.CanvasTexture(cv);tex.colorSpace=THREE.SRGBColorSpace;
   return tex;
 }
 
 function adScreen(ad,i,x,y,z,rotY,hanging){
  const group=new THREE.Group();
- const width=hanging?2.9:2.35,height=hanging?1.70:1.40;
+ const width=ad.width,height=ad.height;
  const frame=new THREE.Mesh(new THREE.BoxGeometry(width,height,.16),MAT.dark);group.add(frame);
  const tex=makeAdTexture(ad,i);
  const screen=new THREE.Mesh(new THREE.PlaneGeometry(width-.14,height-.14),new THREE.MeshBasicMaterial({map:tex}));
@@ -454,18 +450,7 @@ function adScreen(ad,i,x,y,z,rotY,hanging){
  group.position.set(x,y,z);group.rotation.y=rotY;scene.add(group);
 }
 // أربعة شاشات معلقة خارج فتحة السلم، اثنتان لكل طابق.
-const screenPositions=[
- {i:0,x:0,y:3.50,z:-27,rotation:0,hanging:true},
- {i:1,x:0,y:3.50,z:23,rotation:0,hanging:true},
- {i:2,x:0,y:LEVEL_Y+3.15,z:-27,rotation:0,hanging:true},
- {i:4,x:0,y:LEVEL_Y+3.15,z:23,rotation:0,hanging:true},
- // الشاشات الجدارية تقع في الفراغات بين المحلات.
- {i:3,x:-HALL_W/2+.62,y:2.35,z:-13.5,rotation:Math.PI/2,hanging:false},
- {i:5,x:HALL_W/2-.62,y:2.35,z:4.5,rotation:-Math.PI/2,hanging:false},
- {i:0,x:-HALL_W/2+.62,y:LEVEL_Y+2.15,z:4.5,rotation:Math.PI/2,hanging:false},
- {i:1,x:HALL_W/2-.62,y:LEVEL_Y+2.15,z:-13.5,rotation:-Math.PI/2,hanging:false},
-];
-screenPositions.forEach(p=>adScreen(ADS[p.i],p.i,p.x,p.y,p.z,p.rotation,p.hanging));
+ADS.filter(ad=>ad.enabled).forEach((ad,i)=>adScreen(ad,i,ad.x,ad.floor*LEVEL_Y+ad.center_y,ad.z,ad.rotation*Math.PI/180,ad.hanging));
 
 /* مقاعد ونباتات */
 for (let z = -24; z <= 24; z += 12) {
@@ -479,90 +464,87 @@ for (let z = -24; z <= 24; z += 12) {
   }
 }
 
-/* ---------- غرفة محلك ---------- */
-const SHOP = new THREE.Group();
-SHOP.position.set(200, 0, 0);
-scene.add(SHOP);
-{
-  const S = 18;
-  const room = new THREE.Mesh(new THREE.BoxGeometry(S, 7, S),
-    new THREE.MeshStandardMaterial({ color:0x14101a, roughness:0.9, side:THREE.BackSide }));
-  room.position.y = 3.5; SHOP.add(room);
-  const fl = new THREE.Mesh(new THREE.PlaneGeometry(S, S),
-    new THREE.MeshStandardMaterial({ color:0x1a1622, roughness:0.3, metalness:0.7 }));
-  fl.rotation.x = -Math.PI/2; fl.position.y = 0.02; SHOP.add(fl);
-  const sg = makeSign('📱 إكسسواراتك', '#ff2fd6', 95);
-  sg.position.set(0, 5.2, -S/2 + .25); SHOP.add(sg);
-  const mk = (w,h,d,x,y,z,c) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshBasicMaterial({ color:c })); m.position.set(x,y,z); SHOP.add(m); return m; };
-  mk(S-.3, .1, .1, 0, 6.8, -S/2+.2, 0xff2fd6);
-  mk(S-.3, .1, .1, 0, 6.8,  S/2-.2, 0x00f0ff);
-  mk(.1, .1, S-.3, -S/2+.2, 6.8, 0, 0x7b2ff7);
-  mk(.1, .1, S-.3,  S/2-.2, 6.8, 0, 0x00ff9d);
-  const exitDoor = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 3.4),
-    new THREE.MeshBasicMaterial({ color:0xd4a94e, transparent:true, opacity:0.5, side:THREE.DoubleSide }));
-  exitDoor.position.set(0, 1.7, S/2 - .3);
-  exitDoor.rotation.y = Math.PI;
-  exitDoor.userData.isExit = true;
-  SHOP.add(exitDoor);
-  doors.push(exitDoor);
-  const exitSign = makeSign('🚪 خروج للمول', '#ffd9a0', 55, 512, 128);
-  exitSign.scale.set(0.5, 0.5, 0.5);
-  exitSign.position.set(0, 4.1, S/2 - .35);
-  exitSign.rotation.y = Math.PI;
-  SHOP.add(exitSign);
-}
 
-const productMeshes = [];
-function makeShelfUnit(x, z, rotY, catName, catColor) {
-  const g = new THREE.Group();
-  g.position.set(x, 0, z); g.rotation.y = rotY;
-  const back = new THREE.Mesh(new THREE.BoxGeometry(4.6, 4.2, 0.15),
-    new THREE.MeshStandardMaterial({ color:0x1a1622, roughness:0.6, metalness:0.5 }));
-  back.position.y = 2.1; back.castShadow = true; g.add(back);
-  const edge = new THREE.Mesh(new THREE.BoxGeometry(4.75, 4.35, 0.08),
-    new THREE.MeshBasicMaterial({ color:catColor }));
-  edge.position.set(0, 2.1, -0.06); g.add(edge);
-  for (let i = 0; i < 3; i++) {
-    const sh = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.1, 1.0),
-      new THREE.MeshStandardMaterial({ color:0x242030, roughness:0.4, metalness:0.7 }));
-    sh.position.set(0, 0.9 + i * 1.3, 0.45); sh.castShadow = true; g.add(sh);
-  }
-  const catSign = makeSign(catName, '#'+new THREE.Color(catColor).getHexString(), 75);
-  catSign.scale.set(0.3, 0.3, 0.3);
-  catSign.position.set(0, 4.7, 0.25); g.add(catSign);
-  SHOP.add(g);
-  return g;
+/* ---------- غرف المحلات المستقلة ---------- */
+const SHOP=new THREE.Group();SHOP.position.set(200,0,0);scene.add(SHOP);
+const productMeshes=[],shopUnits=[];
+let activeStore=null,shopObstacles=[];
+function disposeObject(root){
+ root.traverse(o=>{o.geometry?.dispose();const materials=o.material?(Array.isArray(o.material)?o.material:[o.material]):[];for(const m of materials){if(m.map){m.map.userData.disposed=true;m.map.dispose();}m.dispose();}});
 }
-function addProductToShelf(group, product, shelfIndex, slotIndex) {
-  const shelfY = 0.95 + shelfIndex * 1.3;
-  const slotX = -1.5 + slotIndex * 1.5;
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.95, 0.45),
-    new THREE.MeshStandardMaterial({ color:0x111118, roughness:0.3, metalness:0.8, emissive:product.color, emissiveIntensity:0.55 }));
-  mesh.position.set(slotX, shelfY + 0.5, 0.45);
-  mesh.castShadow = true;
-  mesh.userData.product = product;
-  group.add(mesh);
-  productMeshes.push(mesh);
-  const glow = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.1, 0.55),
-    new THREE.MeshBasicMaterial({ color:product.color, transparent:true, opacity:0.12 }));
-  glow.position.copy(mesh.position);
-  group.add(glow);
+function imageFor(p){
+ const url=httpURL(p.image);if(url)return url;
+ const svg='<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" rx="20" fill="#edf0f3"/><rect x="133" y="55" width="134" height="273" rx="28" fill="#26374d"/><rect x="145" y="70" width="110" height="220" rx="18" fill="#d8c39e"/><circle cx="200" cy="309" r="7" fill="#d8c39e"/></svg>';
+ return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
 }
-const shopUnits = [
-  makeShelfUnit(-6, -8.2, 0, "كفرات", 0xff2fd6),
-  makeShelfUnit(-2, -8.2, 0, "كفرات", 0xff2fd6),
-  makeShelfUnit(2,  -8.2, 0, "سماعات", 0x00f0ff),
-  makeShelfUnit(6,  -8.2, 0, "سماعات", 0x00f0ff),
-  makeShelfUnit(-8.2, -3, Math.PI/2, "شواحن", 0x7b2ff7),
-  makeShelfUnit(-8.2, 2,  Math.PI/2, "حماية", 0x00ff9d),
-  makeShelfUnit(8.2, -3, -Math.PI/2, "إكسسوارات", 0xffe600),
-  makeShelfUnit(8.2, 2,  -Math.PI/2, "إكسسوارات", 0xffe600),
-];
-products.forEach((p, i) => {
-  const unit = shopUnits[i % shopUnits.length];
-  addProductToShelf(unit, p, Math.floor(i / shopUnits.length) % 3, i % 3);
-});
-
+function cardTexture(p){
+ const cv=document.createElement('canvas');cv.width=512;cv.height=640;const ctx=cv.getContext('2d');
+ const texture=new THREE.CanvasTexture(cv);texture.colorSpace=THREE.SRGBColorSpace;
+ function paint(img){
+  if(texture.userData.disposed)return;ctx.fillStyle='#edf0f3';ctx.fillRect(0,0,512,640);
+  if(img){const k=Math.min(462/img.width,420/img.height);ctx.drawImage(img,(512-img.width*k)/2,20+(420-img.height*k)/2,img.width*k,img.height*k);}
+  ctx.fillStyle='#26374d';ctx.fillRect(0,460,512,180);ctx.direction='rtl';ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='bold 27px Tahoma';
+  ctx.fillText(p.name,256,505,468);ctx.font='bold 34px Tahoma';ctx.fillStyle='#d8c39e';ctx.fillText(Number(p.price).toFixed(2)+' ر.س',256,557,470);
+  ctx.font='20px Tahoma';ctx.fillStyle='#c2cad3';ctx.fillText(httpURL(p.image)?p.cat:'رسم تجريبي · '+p.cat,256,605,470);texture.needsUpdate=true;
+ }
+ paint();const img=new Image();img.crossOrigin='anonymous';img.onload=()=>paint(img);
+ img.onerror=()=>{img.onerror=null;img.src=imageFor({...p,image:''});};img.src=imageFor(p);return texture;
+}
+function buildShelf(s){
+ const group=new THREE.Group();group.position.set(s.x,0,s.z);group.rotation.y=s.rotation*Math.PI/180;
+ group.scale.set(s.width/5,s.height/6.2,s.depth/1.1);group.userData.shelf=s;group.userData.page=0;
+ const mat=new THREE.MeshStandardMaterial({color:settings.shelf_color,roughness:.65,metalness:.12});
+ const back=new THREE.Mesh(new THREE.BoxGeometry(5,6.2,.15),mat);back.position.y=3.1;group.add(back);
+ for(let row=0;row<3;row++){
+  const shelf=new THREE.Mesh(new THREE.BoxGeometry(5,.1,1.1),mat.clone());shelf.position.set(0,.9+row*1.6,.5);group.add(shelf);
+  const led=new THREE.Mesh(new THREE.BoxGeometry(4.85,.025,.025),new THREE.MeshBasicMaterial({color:0xffedd0}));led.position.set(0,.95+row*1.6,1.05);group.add(led);
+ }
+ const title=makeSign(s.name,'#fff',70);title.scale.set(.4,.4,.4);title.position.set(0,6.7,.3);group.add(title);
+ SHOP.add(group);shopUnits.push(group);renderShelf(group);
+}
+function addCard(group,p){
+ const root=new THREE.Group();root.userData.productRoot=true;root.position.set(-1.65+p.slot_index*1.65,1.7+p.row_index*1.6,.74);
+ const texture=cardTexture(p);
+ const front=new THREE.Mesh(new THREE.PlaneGeometry(1.10,1.375),new THREE.MeshBasicMaterial({map:texture}));
+ front.userData.product=p;root.add(front);group.add(root);productMeshes.push(front);
+}
+function renderShelf(group){
+ for(const root of [...group.children].filter(o=>o.userData.productRoot||o.userData.pagination)){
+  const members=[];root.traverse(o=>members.push(o));for(let i=productMeshes.length-1;i>=0;i--)if(members.includes(productMeshes[i]))productMeshes.splice(i,1);
+  group.remove(root);disposeObject(root);
+ }
+ const list=products.filter(p=>p.store_id===activeStore.id&&p.shelf_id===group.userData.shelf.id);
+ const pages=[...new Set(list.map(p=>p.page_index))].sort((a,b)=>a-b);if(!pages.length)return;
+ if(!pages.includes(group.userData.page))group.userData.page=pages[0];
+ list.filter(p=>p.page_index===group.userData.page).forEach(p=>addCard(group,p));
+ if(pages.length>1){
+  const label=makeSign('المزيد من المنتجات · '+(pages.indexOf(group.userData.page)+1)+' / '+pages.length,'#fff',60);
+  label.scale.set(.4,.35,.4);label.position.set(0,.45,.9);label.userData.pagination=true;
+  label.userData.action=()=>{group.userData.page=pages[(pages.indexOf(group.userData.page)+1)%pages.length];renderShelf(group);};
+  group.add(label);productMeshes.push(label);
+ }
+}
+function buildShop(st){
+ activeStore=st;selectedMesh=null;productMeshes.length=0;shopUnits.length=0;shopObstacles=[];
+ // Interior meshes have their own materials; removing one never disposes the mall materials.
+ for(const child of [...SHOP.children]){SHOP.remove(child);disposeObject(child);}
+ const w=settings.room_width,d=settings.room_depth,h=settings.room_height;
+ const room=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color:settings.wall_color,roughness:.9,side:THREE.BackSide}));
+ room.position.y=h/2;SHOP.add(room);
+ const floorMesh=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshStandardMaterial({color:settings.floor_color,roughness:.7}));
+ floorMesh.rotation.x=-Math.PI/2;floorMesh.position.y=.04;SHOP.add(floorMesh);
+ const sign=makeSign(st.name,"#"+new THREE.Color(st.color).getHexString(),95);sign.position.set(0,h-2,-d/2+.2);SHOP.add(sign);
+ const lamp=new THREE.PointLight(settings.light_color,90*settings.light_intensity,Math.max(w,d)*2);lamp.position.set(0,h-1,0);SHOP.add(lamp);
+ const door=new THREE.Mesh(new THREE.PlaneGeometry(2.8,3.3),new THREE.MeshBasicMaterial({color:settings.accent_color,transparent:true,opacity:.6,side:THREE.DoubleSide}));
+ door.position.set(0,1.7,d/2-.25);door.rotation.y=Math.PI;door.userData.isExit=true;SHOP.add(door);
+ for(let i=doors.length-1;i>=0;i--)if(doors[i].userData.isExit)doors.splice(i,1);doors.push(door);
+ const exit=makeSign('خروج إلى المول','#fff',65);exit.scale.set(.5,.4,.5);exit.position.set(0,4.1,d/2-.3);exit.rotation.y=Math.PI;SHOP.add(exit);
+ for(const s of shelfRows.filter(s=>s.store_id===st.id&&s.enabled))buildShelf(s);
+ for(const unit of shopUnits){
+  unit.updateMatrixWorld(true);const box=new THREE.Box3();for(const x of [-2.65,2.65])for(const z of [-.2,1.15])box.expandByPoint(unit.localToWorld(new THREE.Vector3(x,0,z)));shopObstacles.push(box);
+ }
+}
+function blockedShop(x,z){return shopObstacles.some(b=>x>b.min.x-.3&&x<b.max.x+.3&&z>b.min.z-.3&&z<b.max.z+.3);}
 /* ---------- الحالة والتنقل ---------- */
 let zone = 'mall';        // mall | shop
 let floor = 0;            // 0 أرضي | 1 أول
@@ -570,18 +552,18 @@ let riding = null;        // {t, from, to, up}
 
 const ZONES = {
   mall: { label: () => floor === 0 ? 'الطابق الأرضي — الممر الرئيسي' : 'الطابق الأول — الممر' },
-  shop: { label: () => 'محلك — إكسسواراتك' },
+  shop: { label: () => activeStore?.name||'داخل المحل' },
 };
 function updateBadge() { document.getElementById('zone').textContent = ZONES[zone].label(); }
 
-function teleport(z) {
+function teleport(z,st=null) {
   if(transitioning)return;transitioning=true;clearMovement();
   const fade = document.getElementById('fade');
   fade.style.opacity = 1;
   setTimeout(() => {
     zone = z;
-    if (z === 'shop') { camera.position.set(200, 1.7, 4); yaw = 0; floor = 0; }
-    else { camera.position.set(8,1.7+LEVEL_Y*floor,floor===0?0:-5);yaw=Math.PI/2; }
+    if(z==='shop'){buildShop(st);floor=st.floor;camera.position.set(200,1.7,settings.room_depth/2-4);yaw=0;}
+    else { camera.position.set((activeStore?.side||1)*9,1.7+LEVEL_Y*floor,activeStore?.z||0);yaw=activeStore?.side===1?Math.PI/2:-Math.PI/2; }
     pitch = 0;
     updateBadge(); closePanel();
     fade.style.opacity = 0;transitioning=false;
@@ -600,7 +582,7 @@ function startRide(up) {
 }
 
 /* ---------- التحكم ---------- */
-let yaw = 0, pitch = 0;
+let yaw=settings.spawn_yaw*Math.PI/180,pitch=0;
 
 const keys={};
 const stick={x:0,y:0,pointer:null};
@@ -664,14 +646,14 @@ renderer.domElement.addEventListener('pointerup',e=>{
   pointer.y = -(e.clientY / innerHeight) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
 
-  const hits = raycaster.intersectObjects(productMeshes, false);
+  const hits = zone==='shop'?raycaster.intersectObjects(productMeshes, false).filter(h=>h.distance<12):[];
   if (hits.length) { selectProduct(hits[0].object); return; }
 
-  const dhits = raycaster.intersectObjects(doors, false);
+  const dhits = raycaster.intersectObjects(doors.filter(d=>zone==='shop'?d.userData.isExit:!d.userData.isExit&&d.userData.store?.floor===floor), false).filter(h=>h.distance<14);
   if (dhits.length) {
     const d = dhits[0].object;
     if (d.userData.isExit) teleport('mall');
-    else if (d.userData.store?.open) teleport('shop');
+    else if (d.userData.store?.open) teleport('shop',d.userData.store);
     else showToast('🔒 هذا المحل قريبًا — ترقبوا الافتتاح!');
     return;
   }
@@ -679,7 +661,7 @@ renderer.domElement.addEventListener('pointerup',e=>{
   const ahits = raycaster.intersectObjects(adScreens, false);
   if (ahits.length) {
     const ad = ahits[0].object.userData.ad;
-    if (ad.url && ad.url !== '#') window.open(ad.url, '_blank');
+    if(httpURL(ad.url))window.open(httpURL(ad.url),'_blank','noopener,noreferrer');
     else showToast('📢 هذه المساحة الإعلانية متاحة للتأجير!');
     return;
   }
@@ -694,24 +676,169 @@ function showToast(msg) {
 }
 
 function selectProduct(mesh) {
+  if(mesh.userData.action){mesh.userData.action();return;}
   clearMovement();document.body.classList.add("panel-open");
-  if (selectedMesh) selectedMesh.material.emissiveIntensity = 0.55;
+
   selectedMesh = mesh;
-  mesh.material.emissiveIntensity = 1.4;
+
   const p = mesh.userData.product;
-  document.getElementById('p-img').textContent = p.icon;
+
+ const image=document.createElement('img');image.src=imageFor(p);image.alt=p.name;image.style.cssText='width:100%;height:100%;object-fit:contain';
+ image.onerror=()=>{image.onerror=null;image.src=imageFor({...p,image:''});};
+ document.getElementById('p-img').replaceChildren(image);
+
   document.getElementById('p-name').textContent = p.name;
   document.getElementById('p-cat').textContent = 'القسم: ' + p.cat;
   document.getElementById('p-desc').textContent = p.desc;
-  document.getElementById('p-price').innerHTML = p.price + ' <small>ر.س</small>';
-  document.getElementById('p-btn').href = SALLA_STORE_URL + '/products/' + p.id;
+  document.getElementById('p-price').textContent=Number(p.price).toFixed(2)+' ر.س';
+  
+ const url=httpURL(p.url)||httpURL(activeStore?.store_url)||SALLA_STORE_URL,button=document.getElementById('p-btn');
+ if(url){button.href=url;button.removeAttribute('aria-disabled');button.textContent=httpURL(p.url)?'اطلب المنتج من سلة':'زيارة متجر المحل';}
+ else{button.removeAttribute('href');button.setAttribute('aria-disabled','true');button.textContent='الطلب غير متاح حالياً';}
+
   document.getElementById('panel').classList.add('open');
 }
 window.closePanel = function() {
   document.body.classList.remove("panel-open");
   document.getElementById('panel').classList.remove('open');
-  if (selectedMesh) { selectedMesh.material.emissiveIntensity = 0.55; selectedMesh = null; }
+  selectedMesh=null;
 };
+
+const peers=new Map();
+let roomChannel=null,roomConnected=false,roomId=null,sendAccumulator=0;
+const connectionId=crypto.randomUUID();
+let playerName=sessionStorage.getItem('wesam-name')||'';
+const socialButton=document.getElementById('social-button'),roomDialog=document.getElementById('room-dialog');
+const params=new URLSearchParams(location.hash.slice(1));
+const invited=params.has('room')&&params.has('invite');
+document.getElementById('visitor-name').value=playerName;
+document.getElementById('room-title').textContent=invited?'انضم لغرفة التسوق':'تسوقوا مع بعض';
+document.getElementById('room-submit').textContent=invited?'الانضمام للغرفة':'إنشاء غرفة دعوة';
+socialButton.hidden=!settings.multiplayer_enabled||new URLSearchParams(location.search).has('preview');
+socialButton.onclick=()=>{clearMovement();roomDialog.showModal();};
+if(invited&&!socialButton.hidden)roomDialog.showModal();
+setInterval(async()=>{if(!roomConnected||!roomId)return;try{const valid=requireOK(await cloudDB.rpc('shop_can_join_topic',{topic:'shop:'+roomId}));if(!valid){await cloudDB.removeChannel(roomChannel);roomChannel=null;roomConnected=false;peers.forEach(p=>{scene.remove(p.object);disposeObject(p.object)});peers.clear();socialButton.textContent='تسوق مع غيرك';document.getElementById('room-status').textContent='انتهت صلاحية الغرفة. غادرها لإنشاء دعوة جديدة.';roomDialog.showModal();clearMovement();}}catch{}},60000);
+document.getElementById('room-close').onclick=()=>roomDialog.close();
+document.getElementById('room-copy').onclick=async()=>{
+ try{await navigator.clipboard.writeText(location.href);document.getElementById('room-status').textContent='تم نسخ رابط الدعوة. أرسله لأخوك.';}
+ catch{document.getElementById('invite-link').hidden=false;document.getElementById('invite-link').value=location.href;document.getElementById('invite-link').select();}
+};
+document.getElementById('room-leave').onclick=async()=>{
+ if(roomChannel)await cloudDB.removeChannel(roomChannel);if(roomId)await cloudDB.rpc('shop_leave_room',{room:roomId});roomChannel=null;roomConnected=false;roomId=null;
+ peers.forEach(p=>{scene.remove(p.object);disposeObject(p.object);});peers.clear();
+ document.getElementById('room-copy').hidden=true;document.getElementById('room-leave').hidden=true;
+ document.getElementById('room-form').hidden=false;document.getElementById('room-status').textContent='غادرت الغرفة.';
+ socialButton.textContent='تسوق مع غيرك';
+ history.replaceState(null,'',location.pathname+location.search);
+};
+function makeVisitor(name,id){
+ const object=new THREE.Group();
+ const hue=[...id].reduce((sum,c)=>sum+c.charCodeAt(0),0)%360;
+ const color=new THREE.Color().setHSL(hue/360,.35,.42);
+ const body=new THREE.Mesh(new THREE.CapsuleGeometry(.24,.65,4,8),new THREE.MeshStandardMaterial({color,roughness:.8}));
+ body.position.y=.94;object.add(body);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.22,12,8),new THREE.MeshStandardMaterial({color:0xdfb99b}));
+ head.position.y=1.62;object.add(head);
+ const nose=new THREE.Mesh(new THREE.SphereGeometry(.055,8,6),new THREE.MeshStandardMaterial({color:0xc79978}));
+ nose.position.set(0,1.61,-.20);object.add(nose);
+ for(const x of [-.15,.15]){
+  const leg=new THREE.Mesh(new THREE.CylinderGeometry(.07,.08,.55,8),new THREE.MeshStandardMaterial({color:0x26374d}));
+  leg.position.set(x,.35,0);object.add(leg);
+ }
+ const cv=document.createElement('canvas');cv.width=512;cv.height=128;const ctx=cv.getContext('2d');
+ ctx.fillStyle='#26374de6';ctx.beginPath();ctx.roundRect(4,4,504,120,24);ctx.fill();
+ ctx.fillStyle='#fff';ctx.font='bold 42px Tahoma';ctx.textAlign='center';ctx.textBaseline='middle';ctx.direction='rtl';ctx.fillText(name.slice(0,24),256,64,470);
+ const tex=new THREE.CanvasTexture(cv);tex.colorSpace=THREE.SRGBColorSpace;
+ const label=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false}));label.position.y=2.18;label.scale.set(1.65,.4125,1);object.add(label);
+ object.position.set(settings.spawn_x,0,settings.spawn_z);scene.add(object);
+ return{object,target:new THREE.Vector3(settings.spawn_x,0,settings.spawn_z),zone:null,storeId:null,yaw:0,lastSeen:Date.now()};
+}
+function syncVisitors(){
+ const state=roomChannel.presenceState(),active=new Set();
+ for(const entries of Object.values(state))for(const entry of entries){
+  if(typeof entry.id!=='string'||entry.id===connectionId||typeof entry.name!=='string')continue;
+  active.add(entry.id);
+  if(!peers.has(entry.id)&&peers.size<11)peers.set(entry.id,makeVisitor(entry.name,entry.id));
+ }
+ for(const [id,p] of peers)if(!active.has(id)){scene.remove(p.object);disposeObject(p.object);peers.delete(id);}
+ socialButton.textContent='الغرفة · '+(peers.size+1)+' أشخاص';
+}
+function updateVisitors(dt){
+ for(const p of peers.values()){
+  p.object.visible=p.zone===zone&&(zone!=="shop"||p.storeId===activeStore?.id);
+  p.object.position.lerp(p.target,1-Math.exp(-dt*12));
+  const diff=Math.atan2(Math.sin(p.yaw-p.object.rotation.y),Math.cos(p.yaw-p.object.rotation.y));
+  p.object.rotation.y+=diff*(1-Math.exp(-dt*12));
+ }
+ sendAccumulator+=dt;
+ if(roomConnected&&roomChannel&&sendAccumulator>=.12){
+  sendAccumulator=0;
+  roomChannel.send({type:'broadcast',event:'move',payload:{id:connectionId,x:camera.position.x,y:zone==="shop"?0:Math.max(0,camera.position.y-1.7),z:camera.position.z,yaw,zone,storeId:zone==="shop"?activeStore?.id:null}});
+ }
+}
+document.getElementById('room-form').onsubmit=async(e)=>{
+ e.preventDefault();const submit=document.getElementById('room-submit');submit.disabled=true;
+ try{
+  if(!cloudReady)throw new Error('جهّز قاعدة البيانات أولاً ثم أعد تحميل المحل.');
+  playerName=document.getElementById('visitor-name').value.trim().slice(0,24);if(!playerName)throw new Error('أدخل اسمك.');
+  sessionStorage.setItem('wesam-name',playerName);
+  const current=await cloudDB.auth.getSession();let session=current.data.session;
+  if(!session){const signIn=await cloudDB.auth.signInAnonymously();if(signIn.error)throw new Error('تعذر دخول الزائر. فعّل Anonymous Sign-Ins في Supabase. '+signIn.error.message);session=signIn.data.session;}
+  await cloudDB.realtime.setAuth(session.access_token);
+  let room;
+  const hash=new URLSearchParams(location.hash.slice(1));
+  if(hash.has('room')&&hash.has('invite')){
+   room={id:hash.get('room'),token:hash.get('invite')};
+   requireOK(await cloudDB.rpc('shop_join_room',{room:room.id,token:room.token}));
+  }else{
+   room=requireOK(await cloudDB.rpc('shop_create_room'));
+   history.replaceState(null,'',location.pathname+location.search+'#room='+encodeURIComponent(room.id)+'&invite='+encodeURIComponent(room.token));
+  }
+  roomId=room.id;if(roomChannel)await cloudDB.removeChannel(roomChannel);
+  roomChannel=cloudDB.channel('shop:'+roomId,{config:{private:true,presence:{key:connectionId},broadcast:{self:false}}});
+  roomChannel.on('presence',{event:'sync'},syncVisitors)
+   .on('broadcast',{event:'move'},({payload})=>{
+    const p=peers.get(payload?.id);if(!p||![payload.x,payload.z,payload.yaw].every(Number.isFinite))return;
+    if(!['mall','shop'].includes(payload.zone)||!Number.isFinite(payload.y)||Math.abs(payload.z)>50||payload.y<-.2||payload.y>LEVEL_Y+.2)return;
+    if(payload.zone==='mall'&&Math.abs(payload.x)>13)return;
+    if(payload.zone==='shop'&&(Math.abs(payload.x-200)>50||!mallStoreRows.some(s=>s.id===payload.storeId)))return;
+    p.zone=payload.zone;p.storeId=payload.storeId;p.target.set(payload.x,payload.y,payload.z);
+    p.yaw=payload.yaw;p.lastSeen=Date.now();
+   });
+  await new Promise((resolve,reject)=>{
+   const timer=setTimeout(()=>reject(new Error('تعذر الاتصال بالغرفة. تحقق من إعدادات Realtime والسياسات.')),12000);
+   roomChannel.subscribe(async status=>{
+    if(status==='SUBSCRIBED'){
+     roomConnected=true;
+     const tracked=await roomChannel.track({id:connectionId,name:playerName});
+     if(tracked!=='ok'){clearTimeout(timer);reject(new Error('تعذر إعلان حضورك في الغرفة.'));return;}
+     clearTimeout(timer);resolve();
+    }else if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(status)){
+     roomConnected=false;document.getElementById('room-status').textContent='انقطع الاتصال بالغرفة. يحاول المتجر الاتصال من جديد.';clearTimeout(timer);reject(new Error('تعذر الاتصال بالغرفة. راجع سياسات Realtime.'));
+    }
+   });
+  });
+  document.getElementById('room-form').hidden=true;
+  document.getElementById('room-copy').hidden=false;document.getElementById('room-leave').hidden=false;
+  document.getElementById('room-status').textContent='متصل. انسخ رابط الدعوة ليشاركك غيرك. الدعوة صالحة 24 ساعة، حتى 12 حساباً.';
+  roomDialog.close();
+ }catch(error){
+  document.getElementById('room-status').textContent=error.message;
+  if(!roomConnected&&roomChannel){await cloudDB.removeChannel(roomChannel);roomChannel=null;}
+ }finally{submit.disabled=false;}
+};
+document.addEventListener('visibilitychange',()=>{if(document.hidden)clearMovement();});
+
+
+
+// Public catalogue reads do not require a public Realtime channel.
+let catalogueSignature=JSON.stringify([settings,mallStoreRows,screenRows,shelfRows,itemRows]),checkingCatalogue=false;
+if(cloudReady)setInterval(async()=>{
+ if(document.hidden||checkingCatalogue)return;checkingCatalogue=true;
+ try{const [s,stores,screens,shelves,products]=await Promise.all([cloudDB.from('shop_settings').select('*').eq('id',1).single().then(requireOK),allRows(cloudDB,'mall_stores'),allRows(cloudDB,'mall_screens'),allRows(cloudDB,'shop_shelves'),allRows(cloudDB,'shop_products')]);const fresh={s,stores,screens,shelves,products};const signature=JSON.stringify([fresh.s,fresh.stores,fresh.screens,fresh.shelves,fresh.products]);
+ if(signature!==catalogueSignature){const note=document.getElementById('db-note');note.hidden=false;note.replaceChildren(document.createTextNode('توفرت تحديثات للمول. '));const button=document.createElement('button');button.textContent='عرض التحديثات';button.onclick=()=>location.reload();note.append(button);catalogueSignature=signature;}}
+ catch(error){console.warn('Catalogue refresh unavailable:',error.message);}finally{checkingCatalogue=false;}
+},30000);
 
 /* ---------- الحلقة ---------- */
 const clock = new THREE.Clock();
@@ -734,7 +861,7 @@ function animate() {
     s.mesh.position.set(0,yy-.08,zz);
   });
 
-  const speed = (keys['ShiftLeft'] || keys['ShiftRight']) ? 8 : 4;
+  const speed=settings.walk_speed*((keys['ShiftLeft']||keys['ShiftRight'])?1.8:1);
 
   /* ===== ركوب السلم ===== */
   if (riding) {
@@ -774,11 +901,12 @@ function animate() {
     if (keys['KeyD'] || keys['ArrowRight']) { mx += rx; mz += rz; }
     if (keys['KeyA'] || keys['ArrowLeft'])  { mx -= rx; mz -= rz; }
 
-    if(riding||transitioning||document.getElementById("panel").classList.contains("open")){mx=0;mz=0;}
+    if(riding||transitioning||roomDialog.open||document.getElementById("panel").classList.contains("open")){mx=0;mz=0;}
     const len=Math.hypot(mx,mz);
     if (len > 0) {
-      camera.position.x += (mx/Math.max(1,len))*speed*dt;
-      camera.position.z += (mz/Math.max(1,len))*speed*dt;
+      const nextX=camera.position.x+(mx/Math.max(1,len))*speed*dt,nextZ=camera.position.z+(mz/Math.max(1,len))*speed*dt;
+      if(zone==='mall'||!blockedShop(nextX,camera.position.z))camera.position.x=nextX;
+      if(zone==='mall'||!blockedShop(camera.position.x,nextZ))camera.position.z=nextZ;
       bobT += dt * speed * 2.2;
     }
 
@@ -798,8 +926,8 @@ function animate() {
       }
       camera.position.y = LEVEL_Y * floor + EYE + Math.sin(bobT) * 0.045;
     } else {
-      camera.position.x = Math.max(200 - 7.5, Math.min(200 + 7.5, camera.position.x));
-      camera.position.z = Math.max(-7.5, Math.min(7.5, camera.position.z));
+      camera.position.x=Math.max(200-settings.room_width/2+.5,Math.min(200+settings.room_width/2-.5,camera.position.x));
+      camera.position.z=Math.max(-settings.room_depth/2+.5,Math.min(settings.room_depth/2-.5,camera.position.z));
       camera.position.y = EYE + Math.sin(bobT) * 0.045;
     }
     camera.rotation.y = yaw;
@@ -807,7 +935,7 @@ function animate() {
   }
 
   camera.rotation.y=yaw;camera.rotation.x=pitch;
-  renderer.render(scene,camera);
+  updateVisitors(dt);renderer.render(scene,camera);
 }
 animate();
 
