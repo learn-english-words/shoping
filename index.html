@@ -56,7 +56,7 @@ body.panel-open #mobile-stick{visibility:hidden}
 #room-dialog{margin:auto;padding:26px;width:min(410px,calc(100vw - 32px));max-height:90dvh;overflow:auto;border:1px solid #d8c39e;border-radius:18px;background:#faf8f2;color:#26374d}
 #room-dialog::backdrop{background:#192b3d66}#room-dialog h2{font-size:22px;margin-bottom:14px}#room-dialog p{font-size:13px;line-height:1.9;margin:12px 0}
 #room-close{float:left;border:0;background:none;color:#26374d;font-size:18px}#room-dialog input{width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;margin:10px 0;background:white}
-#room-dialog label{font-size:12px}#room-submit,#room-copy,#room-leave{padding:12px 16px;border:0;background:#26374d;color:white;border-radius:9px}#room-submit{width:100%}.room-actions{display:flex;gap:8px}#room-leave{background:#e8e2d5;color:#26374d}
+#room-dialog label{font-size:12px}#room-submit,#room-copy,#room-leave{padding:12px 16px;border:0;background:#26374d;color:white;border-radius:9px}#room-submit,#public-entry{width:100%;margin-top:8px}#public-entry{padding:14px;border:0;border-radius:9px;background:#297867;color:#fff;font-weight:bold}.room-actions{display:flex;gap:8px}#room-leave{background:#e8e2d5;color:#26374d}
 @media(max-height:500px){#room-dialog{padding:18px}}
 
 #social-button{top:76px} #db-note{position:fixed;bottom:64px;right:16px;max-width:300px;padding:10px;border-radius:10px;background:#fff0cf;color:#634b2b;font-size:12px;z-index:25} #db-note[hidden]{display:none}
@@ -72,9 +72,9 @@ body.panel-open #mobile-stick{visibility:hidden}
 <base target="_blank">
 </head>
 <body>
-<div id="app"></div><div id="db-note" role="status" hidden></div><button id="social-button" hidden>تسوق مع غيرك</button>
-<dialog id="room-dialog"><button id="room-close" aria-label="إغلاق" type="button">✕</button><h2 id="room-title">تسوقوا مع بعض</h2><p>ادخل باسمك وأرسل رابط الغرفة لأخوك. تظهرون كشخصيات داخل المول.</p>
-<form id="room-form"><label for="visitor-name">اسمك</label><input id="visitor-name" maxlength="24" required autocomplete="nickname"><button id="room-submit">إنشاء غرفة دعوة</button></form>
+<div id="app"></div><div id="db-note" role="status" hidden></div><button id="social-button" hidden>دخول عام</button>
+<dialog id="room-dialog"><button id="room-close" aria-label="إغلاق" type="button">✕</button><h2 id="room-title">تسوقوا مع بعض</h2><p>ادخل باسمك واختر دخولًا عامًا للتسوق مع الزوار، أو غرفة خاصة بدعوة.</p>
+<form id="room-form"><label for="visitor-name">اسمك</label><input id="visitor-name" maxlength="24" required autocomplete="nickname"><button id="public-entry" type="submit">دخول عام — مع زوار المول</button><button id="room-submit" type="submit">إنشاء غرفة خاصة</button></form>
 <p id="room-status" role="status" aria-live="polite"></p><input id="invite-link" dir="ltr" readonly hidden aria-label="رابط الدعوة"><div class="room-actions"><button id="room-copy" hidden>نسخ رابط الدعوة</button><button id="room-leave" hidden>مغادرة الغرفة</button></div></dialog>
 
 
@@ -705,7 +705,7 @@ window.closePanel = function() {
 };
 
 const peers=new Map();
-let roomChannel=null,roomConnected=false,roomId=null,sendAccumulator=0;
+let roomChannel=null,roomConnected=false,roomId=null,sendAccumulator=0,publicRoom=false;
 const connectionId=crypto.randomUUID();
 let playerName=sessionStorage.getItem('wesam-name')||'';
 const socialButton=document.getElementById('social-button'),roomDialog=document.getElementById('room-dialog');
@@ -713,18 +713,18 @@ const params=new URLSearchParams(location.hash.slice(1));
 const invited=params.has('room')&&params.has('invite');
 document.getElementById('visitor-name').value=playerName;
 document.getElementById('room-title').textContent=invited?'انضم لغرفة التسوق':'تسوقوا مع بعض';
-document.getElementById('room-submit').textContent=invited?'الانضمام للغرفة':'إنشاء غرفة دعوة';
+document.getElementById('room-submit').textContent=invited?'الانضمام للغرفة الخاصة':'إنشاء غرفة خاصة';
 socialButton.hidden=!settings.multiplayer_enabled||new URLSearchParams(location.search).has('preview');
 socialButton.onclick=()=>{clearMovement();roomDialog.showModal();};
 if(invited&&!socialButton.hidden)roomDialog.showModal();
-setInterval(async()=>{if(!roomConnected||!roomId)return;try{const valid=requireOK(await cloudDB.rpc('shop_can_join_topic',{topic:'shop:'+roomId}));if(!valid){await cloudDB.removeChannel(roomChannel);roomChannel=null;roomConnected=false;peers.forEach(p=>{scene.remove(p.object);disposeObject(p.object)});peers.clear();socialButton.textContent='تسوق مع غيرك';document.getElementById('room-status').textContent='انتهت صلاحية الغرفة. غادرها لإنشاء دعوة جديدة.';roomDialog.showModal();clearMovement();}}catch{}},60000);
+setInterval(async()=>{if(!roomConnected||!roomId)return;try{const valid=requireOK(await cloudDB.rpc('shop_can_join_topic',{topic:'shop:'+roomId}));if(!valid){await cloudDB.removeChannel(roomChannel);roomChannel=null;roomConnected=false;peers.forEach(p=>{scene.remove(p.object);disposeObject(p.object)});peers.clear();socialButton.textContent='دخول عام';document.getElementById('room-status').textContent='انتهت صلاحية الجلسة. غادر ثم ادخل مجددًا.';roomDialog.showModal();clearMovement();}}catch{}},60000);
 document.getElementById('room-close').onclick=()=>roomDialog.close();
 document.getElementById('room-copy').onclick=async()=>{
  try{await navigator.clipboard.writeText(location.href);document.getElementById('room-status').textContent='تم نسخ رابط الدعوة. أرسله لأخوك.';}
  catch{document.getElementById('invite-link').hidden=false;document.getElementById('invite-link').value=location.href;document.getElementById('invite-link').select();}
 };
 document.getElementById('room-leave').onclick=async()=>{
- if(roomChannel)await cloudDB.removeChannel(roomChannel);if(roomId)await cloudDB.rpc('shop_leave_room',{room:roomId});roomChannel=null;roomConnected=false;roomId=null;
+ if(roomChannel)await cloudDB.removeChannel(roomChannel);if(roomId)await cloudDB.rpc('shop_leave_room',{room:roomId});roomChannel=null;roomConnected=false;roomId=null;publicRoom=false;document.getElementById('room-title').textContent='تسوقوا مع بعض';document.getElementById('room-submit').textContent='إنشاء غرفة خاصة';document.getElementById('invite-link').hidden=true;
  peers.forEach(p=>{scene.remove(p.object);disposeObject(p.object);});peers.clear();
  document.getElementById('room-copy').hidden=true;document.getElementById('room-leave').hidden=true;
  document.getElementById('room-form').hidden=false;document.getElementById('room-status').textContent='غادرت الغرفة.';
@@ -761,7 +761,7 @@ function syncVisitors(){
   if(!peers.has(entry.id)&&peers.size<11)peers.set(entry.id,makeVisitor(entry.name,entry.id));
  }
  for(const [id,p] of peers)if(!active.has(id)){scene.remove(p.object);disposeObject(p.object);peers.delete(id);}
- socialButton.textContent='الغرفة · '+(peers.size+1)+' أشخاص';
+ socialButton.textContent=(publicRoom?'المول العام':'الغرفة الخاصة')+' · '+(peers.size+1)+' أشخاص';
 }
 function updateVisitors(dt){
  for(const p of peers.values()){
@@ -776,8 +776,9 @@ function updateVisitors(dt){
   roomChannel.send({type:'broadcast',event:'move',payload:{id:connectionId,x:camera.position.x,y:zone==="shop"?0:Math.max(0,camera.position.y-1.7),z:camera.position.z,yaw,zone,storeId:zone==="shop"?activeStore?.id:null}});
  }
 }
+setInterval(async()=>{if(!roomConnected||!publicRoom||!roomId)return;try{const result=await cloudDB.rpc('mall_public_heartbeat',{room:roomId});if(result.error||!result.data){document.getElementById('room-status').textContent='انتهت جلستك العامة. غادر ثم ادخل من جديد.';}}catch{}},30000);
 document.getElementById('room-form').onsubmit=async(e)=>{
- e.preventDefault();const submit=document.getElementById('room-submit');submit.disabled=true;
+ e.preventDefault();const submit=document.getElementById('room-submit'),publicButton=document.getElementById('public-entry'),joiningPublic=e.submitter?.id==='public-entry';submit.disabled=true;publicButton.disabled=true;
  try{
   if(!cloudReady)throw new Error('جهّز قاعدة البيانات أولاً ثم أعد تحميل المحل.');
   playerName=document.getElementById('visitor-name').value.trim().slice(0,24);if(!playerName)throw new Error('أدخل اسمك.');
@@ -787,14 +788,17 @@ document.getElementById('room-form').onsubmit=async(e)=>{
   await cloudDB.realtime.setAuth(session.access_token);
   let room;
   const hash=new URLSearchParams(location.hash.slice(1));
-  if(hash.has('room')&&hash.has('invite')){
+  if(joiningPublic){
+   room=requireOK(await cloudDB.rpc('mall_join_public'));
+   history.replaceState(null,'',location.pathname+location.search);
+  }else if(hash.has('room')&&hash.has('invite')){
    room={id:hash.get('room'),token:hash.get('invite')};
    requireOK(await cloudDB.rpc('shop_join_room',{room:room.id,token:room.token}));
   }else{
    room=requireOK(await cloudDB.rpc('shop_create_room'));
    history.replaceState(null,'',location.pathname+location.search+'#room='+encodeURIComponent(room.id)+'&invite='+encodeURIComponent(room.token));
   }
-  roomId=room.id;if(roomChannel)await cloudDB.removeChannel(roomChannel);
+  publicRoom=joiningPublic;roomId=room.id;if(roomChannel)await cloudDB.removeChannel(roomChannel);
   roomChannel=cloudDB.channel('shop:'+roomId,{config:{private:true,presence:{key:connectionId},broadcast:{self:false}}});
   roomChannel.on('presence',{event:'sync'},syncVisitors)
    .on('broadcast',{event:'move'},({payload})=>{
@@ -819,13 +823,13 @@ document.getElementById('room-form').onsubmit=async(e)=>{
    });
   });
   document.getElementById('room-form').hidden=true;
-  document.getElementById('room-copy').hidden=false;document.getElementById('room-leave').hidden=false;
-  document.getElementById('room-status').textContent='متصل. انسخ رابط الدعوة ليشاركك غيرك. الدعوة صالحة 24 ساعة، حتى 12 حساباً.';
+  document.getElementById('room-copy').hidden=publicRoom;document.getElementById('room-leave').hidden=false;
+  document.getElementById('room-status').textContent=publicRoom?'أنت في المول العام. الزوار الذين يختارون الدخول العام يظهرون معك؛ حتى 12 حساباً في المجموعة.':'متصل بغرفة خاصة. انسخ رابط الدعوة ليشاركك غيرك. الدعوة صالحة 24 ساعة، حتى 12 حساباً.';
   roomDialog.close();
  }catch(error){
-  document.getElementById('room-status').textContent=error.message;
+  document.getElementById('room-status').textContent=/mall_join_public|mall_public_heartbeat/.test(error.message)?'فعّل الدخول العام بتشغيل mall-public-entry.sql في Supabase ثم أعد المحاولة.':error.message;
   if(!roomConnected&&roomChannel){await cloudDB.removeChannel(roomChannel);roomChannel=null;}
- }finally{submit.disabled=false;}
+ }finally{submit.disabled=false;publicButton.disabled=false;}
 };
 document.addEventListener('visibilitychange',()=>{if(document.hidden)clearMovement();});
 
